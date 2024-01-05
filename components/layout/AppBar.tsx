@@ -26,8 +26,8 @@ export default function PrimarySearchAppBar() {
           </Box>
           <Box sx={{ flexGrow: 1 }}>
             <div className='hidden lg:flex items-center justify-end px-10 gap-6 '>
-              <Link href="/" className=" text-[12px] font-bold navLink">Home</Link>
-              <Link href="/basic" className="text-[12px] font-bold navLink">Basic</Link>
+              <Link href="/" className="btn btn-ghost font-bold ">Home</Link>
+              <Link href="/basic" className="btn btn-ghost font-bold">Basic</Link>
             </div>
           </Box>
           <Box

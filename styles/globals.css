@@ -82,11 +82,11 @@ body {
 /* Heading styles */
 h1 {
   font-family: 'Archivo', sans-serif;
-  font-size: calc(30px + (46 - 30) * ((100vw - 320px) / (1280 - 320)));
+  font-size: calc(30px + (58 - 30) * ((100vw - 320px) / (1280 - 320)));
   font-style: normal;
   font-weight: 900;
   letter-spacing: 125%;
-  line-height: calc(36px + (52 - 36) * ((100vw - 320px) / (1280 - 320)));
+  line-height: calc(36px + (68 - 36) * ((100vw - 320px) / (1280 - 320)));
 }
 h2 {
   font-family: 'Archivo', sans-serif;
