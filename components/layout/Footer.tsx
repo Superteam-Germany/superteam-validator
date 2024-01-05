@@ -8,8 +8,8 @@ export default function Footer() {
   const { isDark, setIsDark } = useContext(ThemeContext);
   return (
     <>
-      <footer className='w-full flex flex-row items-center justify-center gap-8 absolute z-50 bottom-0 left-1/2 -translate-x-1/2 bg-transparent text-black shadow-xl  border-t border-t-0.5 border-t-gray-300 '>
-        <div className="max-w-md w-full flex flex-row items-center justify-center gap-4 text-black dark:text-white">
+      <footer className='w-full h-[50px] flex flex-row items-center justify-center gap-8 relative z-50 bottom-0 left-1/2 -translate-x-1/2 bg-transparent shadow-xl  border-t border-t-0.5 border-t-gray-300 '>
+        <div className="max-w-md w-full flex flex-row items-center justify-center gap-4 ">
           <div className="">Scaffold</div>
           <div className="divider">powered by</div>
           <div className="">

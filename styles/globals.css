@@ -1,5 +1,16 @@
 /* Importing Google Fonts */
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Archivo:wght@500;700;800;900&display=swap');
+
+@font-face {
+  font-family: 'Satoshi-Variable';
+  src: url('../public/fonts/Satoshi-Variable.woff2') format('woff2'),
+       url('../public/fonts/Satoshi-Variable.woff') format('woff'),
+       url('../public/fonts/Satoshi-Variable.ttf') format('truetype');
+       font-weight: 300 900;
+       font-display: swap;
+       font-style: normal;
+}
+
 
 /* Include Tailwind CSS */
 @tailwind base;
@@ -50,13 +61,16 @@ select {
   @apply bg-black text-white hover:text-black hover:bg-builderz-blue !important;
   border: 1px solid black !important;
 }
+html {
+}
 
 /* Body styles */
 body {
-  font-family: 'Inter', sans-serif;
-    @apply bg-light-mesh dark:bg-mesh text-black dark:text-white selection:bg-builderz-blue selection:text-white selection:px-4 dark:selection:text-black;
+  background-color: transparent;
+    font-family: 'Satoshi-Variable', sans-serif;
+          @apply bg-[#141414] text-white  selection:bg-builderz-blue selection:text-white selection:px-4 dark:selection:text-black;
+
   /* margin: 0; */
-  height: 100vh;
   /* Fluid Fonts */
   font-size: calc(16px + (16 - 16) * ((100vw - 320px) / (1280 - 320)));
   font-style: normal;
@@ -67,13 +81,15 @@ body {
 
 /* Heading styles */
 h1 {
-  font-size: calc(30px + (36 - 30) * ((100vw - 320px) / (1280 - 320)));
+  font-family: 'Archivo', sans-serif;
+  font-size: calc(30px + (46 - 30) * ((100vw - 320px) / (1280 - 320)));
   font-style: normal;
   font-weight: 900;
   letter-spacing: 125%;
-  line-height: calc(36px + (40 - 36) * ((100vw - 320px) / (1280 - 320)));
+  line-height: calc(36px + (52 - 36) * ((100vw - 320px) / (1280 - 320)));
 }
 h2 {
+  font-family: 'Archivo', sans-serif;
   font-size: calc(20px + (24 - 20) * ((100vw - 320px) / (1280 - 320)));
   font-style: normal;
   font-weight: 800;
@@ -81,6 +97,7 @@ h2 {
   line-height: calc(34px + (38 - 34) * ((100vw - 320px) / (1280 - 320)));
 }
 h3 {
+  font-family: 'Archivo', sans-serif;
   font-size: calc(18px + (20 - 18) * ((100vw - 320px) / (1280 - 320)));
   font-style: normal;
   font-weight: 700;
@@ -91,7 +108,7 @@ h3 {
 /* Scrollbar styles */
 /* width */
 body::-webkit-scrollbar {
-  width: 8px;
+  width: 0px;
   background-color: var(--chakra-colors-transparent);
 }
 
@@ -264,4 +281,44 @@ body::-webkit-scrollbar-thumb {
 
 .lightMeshBg {
   background: #e6e6f0; background-image: radial-gradient(at 47.0% 96.0%, #a8abbd 0px, transparent 50%),radial-gradient(at 61.0% 15.0%, #d5dde8 0px, transparent 50%),radial-gradient(at 8.0% 16.0%, #c3ccde 0px, transparent 50%),radial-gradient(at 85.0% 28.0%, #b2abeb 0px, transparent 50%),radial-gradient(at 81.0% 66.0%, #ccd2e0 0px, transparent 50%)
+}
+
+.gradientText {
+  background: linear-gradient(76deg, #931403 43.16%, #CA1901 100%);
+background-clip: text;
+-webkit-background-clip: text;
+-webkit-text-fill-color: transparent;
+}
+
+@keyframes scroll {
+  0% { transform: translateX(0); }
+  100% { transform: translateX(calc(-450px))}
+}
+
+
+
+.slider::after {
+  right: 0;
+  top: 0;
+  transform: rotateZ(180deg);
+}
+
+.slider::before {
+  left: 0;
+  top: 0;
+}
+
+.slide-track {
+  animation: scroll 20s linear infinite;
+  display: flex;
+  width: 100%;
+}
+
+.slide-track .slide::after {
+  padding-left: 5rem;
+  content: ' \2022'; /* HTML entity for bullet point */
+}
+
+.slide {
+ 
 }
