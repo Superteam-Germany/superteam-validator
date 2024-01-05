@@ -11,15 +11,13 @@ const Index: React.FC = async () => {
       <Slider />
 
 
-      <section className='w-full my-8'>
+      <section className='w-full my-32'>
         <div className="container mx-auto flex flex-row items-center justify-center gap-8">
-          <div className="w-full flex flex-col items-center justify-center backdrop-blur-lg relative z-40 text-center bg-transparent rounded-lg shadow-lg border border-0.5 border-gray-300 dark:border-gray-800 border-opacity-30 p-4">
-            <h1 className='text-4xl font-bold text-center'>Why Solana?</h1>
-            <p className='text-xl text-center mt-4 max-w-3xl'>Solana is a fast, secure, and censorship resistant blockchain providing the open infrastructure required for global adoption.</p>
-          </div>
-          <div className="w-full flex flex-col items-center justify-center backdrop-blur-lg relative z-40 text-center bg-transparent rounded-lg shadow-lg border border-0.5 border-gray-300 dark:border-gray-800 border-opacity-30 p-4">
-            <h1 className='text-4xl font-bold text-center'>Why Solana?</h1>
-            <p className='text-xl text-center mt-4 max-w-3xl'>Solana is a fast, secure, and censorship resistant blockchain providing the open infrastructure required for global adoption.</p>
+          <div className="w-full flex flex-row items-center justify-center backdrop-blur-lg relative z-40 bg-transparent rounded-lg shadow-lg border border-0.5 border-gray-300 dark:border-gray-800 border-opacity-30 p-4 py-16 text-start">
+            <div className="w-1/2">  <h1 className='text-4xl font-bold text-start'>Calculate your rewards</h1>
+              <p className='text-xl text-start mt-4 max-w-3xl'>Solana is a fast, secure, and censorship resistant blockchain providing the open infrastructure required for global adoption.</p></div>
+            <div className="w-1/2">  <h1 className='text-4xl font-bold text-start'>Your Account</h1>
+              <p className='text-xl text-start mt-4 max-w-3xl'>Solana is a fast, secure, and censorship resistant blockchain providing the open infrastructure required for global adoption.</p></div>
           </div>
         </div>
       </section>
