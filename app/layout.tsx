@@ -23,7 +23,7 @@ export default async function RootLayout({ children }: any) {
             {children}
           </main>
           <Footer />
-          <Toaster position="bottom-right" />
+          <Toaster position="bottom-right" theme='dark' />
         </body>
       </html>
     </LayoutWrapper>

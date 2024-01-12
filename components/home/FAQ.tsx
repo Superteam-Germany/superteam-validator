@@ -5,16 +5,15 @@ import { MinusSmallIcon, PlusSmallIcon } from '@heroicons/react/24/outline'
 
 const faqs = [
   {
-    question: "What's the best thing about Switzerland?",
-    answer:
-      "I don't know, but the flag is a big plus. Lorem ipsum dolor sit amet consectetur adipisicing elit. Quas cupiditate laboriosam fugiat.",
+    question: "What is staking?",
+    answer: 'Staking is where you assign your "voting rights" to a unique Solana computer, called a validator, and earn a return of about 6.5-8% per year, as of June 2023. Voting rights are simply the ability to vote on a transaction, and each Solana token has these rights. The validator uses them to vote if a transaction was a good or bad transaction. Solana is a "Proof of Stake" blockchain and allows for 1,000s of transactions per second.Often over 4, 500. For comparison, Ethereum can currently process about 15 transactions per second. A validator is a node in the Solana network that votes on which transactions to include in the blockchain.This is similar to a miner in POW(proof of work) based chains like Bitcoin & Ethereum, but since Solana is POS(Proof of Stake), it depends on delegators and their Stake, instead of hash power. Staking is therefore delegating your voting rights to a particular node to help keep the network secure and improve decentralization.Solana validators can not be operated from home, they require significant computing power and internet bandwidth.',
   },
   // More questions...
 ]
 
 export default function FAQ() {
   return (
-    <div className="w-full border-t border-t-white">
+    <div className="w-full ">
       <div className="mx-auto max-w-7xl px-6 py-24 sm:py-32 lg:px-8 lg:py-40">
         <div className="mx-auto max-w-4xl divide-y divide-gray-100/10">
           <h2 className="text-2xl font-bold leading-10 tracking-tight text-gray-100">Frequently asked questions</h2>

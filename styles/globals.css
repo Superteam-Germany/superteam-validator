@@ -58,7 +58,7 @@ select {
 
 /* Custom Wallet Button */
 .mymultibutton {
-  @apply bg-black text-white hover:text-black hover:bg-builderz-blue !important;
+  @apply bg-brand-bg text-white hover:text-black hover:bg-builderz-blue !important;
   border: 1px solid black !important;
 }
 html {
@@ -289,10 +289,17 @@ background-clip: text;
 -webkit-background-clip: text;
 -webkit-text-fill-color: transparent;
 }
+.gradientBG {
+    background: linear-gradient(76deg, #931403 43.16%, #CA1901 100%);
+    &:hover {
+      background: linear-gradient(76deg, #c9250f 43.16%, #e93d26 100%);
+      color: white;
+    }
+}
 
 @keyframes scroll {
-  0% { transform: translateX(0); }
-  100% { transform: translateX(calc(-450px))}
+  0% { transform: translateX(500); }
+  100% { transform: translateX(calc(-50px))}
 }
 
 
@@ -314,11 +321,11 @@ background-clip: text;
   width: 100%;
 }
 
-.slide-track .slide::after {
-  padding-left: 5rem;
-  content: ' \2022'; /* HTML entity for bullet point */
-}
 
 .slide {
  
+}
+
+.appBarB {
+  background: radial-gradient(5749358.98% 43200% at 50% 50.26%, #EDEBEB 0%, rgba(237, 235, 235, 0.00) 57.5%);
 }
