@@ -25,7 +25,7 @@ function About() {
               </div>
               <dl className="w-full mt-16 grid grid-cols-1 gap-0.5 overflow-hidden rounded-2xl text-center sm:grid-cols-2 lg:grid-cols-4">
                 {stats.map((stat) => (
-                  <div key={stat.id} className="flex flex-col items-start justify-start gap-2 bg-white/4  p-8 w-full text-start">
+                  <div key={stat.id} className="flex flex-col items-start justify-start gap-2 bg-white/5  p-8 w-full text-start">
                     <dt className="text-sm font-semibold leading-6 text-gray-300 opacity-50">{stat.name}</dt>
                     <dd className="order-first text-3xl font-semibold tracking-tight text-white text-start">{stat.value}</dd>
                   </div>
