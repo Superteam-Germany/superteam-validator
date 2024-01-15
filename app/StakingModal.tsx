@@ -5,6 +5,7 @@ import MyMultiButton from '../components/MyMultiButton'
 import Stats from './Stats'
 import { useWallet } from '@solana/wallet-adapter-react'
 import { Connection, PublicKey, StakeProgram, SystemProgram, Transaction, sendAndConfirmTransaction, LAMPORTS_PER_SOL, Keypair, Lockup, clusterApiUrl, ParsedAccountData, AccountInfo } from '@solana/web3.js'
+import { Spin } from 'antd'
 
 function StakingModal() {
   const wallet = useWallet()
@@ -14,7 +15,7 @@ function StakingModal() {
     pubkey: PublicKey | undefined;
     account: AccountInfo<Buffer | ParsedAccountData>;
   }[]>([]);
-  const [loading, setLoading] = useState(false);
+  const [isLoading, setLoading] = useState(false);
 
   const [inputValue, setInputValue] = useState('');
   const yearlyRewardRate = 0.0722; // 3% yearly reward
@@ -199,7 +200,7 @@ function StakingModal() {
   //   console.log('Transaction ID:', transactionId);
   // }
 
-
+  // const buttonsDisabled = !wallet.connected || !wallet.publicKey || !stakeAccount || isLoading;
 
   return (
     <div className="relative z-50 w-full scale-110 flex items-center justify-center gap-4 max-w-md mt-10 card p-4 mx-auto bg-brand-bg backdrop-blur-xl bg-opacity-50 border border-white border-opacity-40">
@@ -210,10 +211,13 @@ function StakingModal() {
               <input type="text" placeholder='0 SOL' className='bg-transparent text-xs w-full flex text-center items-center justify-center input input-bordered border-opacity-10' />
             </div>
             {
-              balance > 0 ? <div className='w-full flex items-center justify-center flex-col gap-0 mt-2'>
-                {/* <h2>Stake</h2> */}
-                <p className='text-[12px] font-bold opacity-50'>Balance: {balance.toFixed(2) || "X"} SOL</p>
-              </div> : <p className='text-[8px] opacity-50 w-full text-center'>No Stake Account Yet</p>
+              balance > 0 ?
+                <div className='w-full flex items-center justify-center flex-col gap-0 mt-2'>
+                  {/* <h2>Stake</h2> */}
+                  <p className='text-[12px] font-bold opacity-50'>Balance: {balance.toFixed(2) || "X"} SOL</p>
+                </div>
+                :
+                isLoading ? <div className="w-full flex items-center justify-center pt-2"><Spin /></div> : <p className='text-[8px] opacity-50 w-full text-center'>No Stake Account Yet</p>
             }
           </div> : null
       }
@@ -222,8 +226,8 @@ function StakingModal() {
       {
         !wallet.connected ? null : <div className="w-full border border-white border-opacity-10">
           <div className="w-full flex flex-row items-center justify-between gap-2">
-            <button onClick={handleStake} className='!w-[48%] btn gradientBG text-white'>Stake</button>
-            <button className='!w-[48%] btn btn-ghost border border-white border-opacity-10'>Unstake</button>
+            <button onClick={handleStake} className='!w-[48%] btn gradientBG text-white disabled:cursor-not-allowed'>Stake</button>
+            <button className='!w-[48%] btn btn-ghost border border-white border-opacity-10 disabled:cursor-not-allowed'>Unstake</button>
           </div>
         </div>
       }
