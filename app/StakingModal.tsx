@@ -200,7 +200,7 @@ function StakingModal() {
   //   console.log('Transaction ID:', transactionId);
   // }
 
-  // const buttonsDisabled = !wallet.connected || !wallet.publicKey || !stakeAccount || isLoading;
+  const buttonsDisabled = inputValue === '' || Number(inputValue) === 0;
 
   return (
     <div className="relative z-50 w-full scale-110 flex items-center justify-center gap-4 max-w-md mt-10 card p-4 mx-auto bg-brand-bg backdrop-blur-xl bg-opacity-50 border border-white border-opacity-40">
@@ -208,7 +208,17 @@ function StakingModal() {
         wallet.connected ?
           <div className="w-full rounded-md border-opacity-20">
             <div className='flex flex-row items-center justify-center gap-2 '>
-              <input type="text" placeholder='0 SOL' className='bg-transparent text-xs w-full flex text-center items-center justify-center input input-bordered border-opacity-10' />
+              <input
+                type="text"
+                placeholder='0 SOL'
+                className='bg-transparent text-xs w-full flex text-center items-center justify-center input input-bordered border-opacity-10'
+                onChange={(e) => {
+                  const num = Number(e.target.value);
+                  if (!isNaN(num) && num > 0) {
+                    setInputValue(e.target.value);
+                  }
+                }}
+              />
             </div>
             {
               balance > 0 ?
@@ -217,25 +227,32 @@ function StakingModal() {
                   <p className='text-[12px] font-bold opacity-50'>Balance: {balance.toFixed(2) || "X"} SOL</p>
                 </div>
                 :
-                isLoading ? <div className="w-full flex items-center justify-center pt-2"><Spin /></div> : <p className='text-[8px] opacity-50 w-full text-center'>No Stake Account Yet</p>
+                isLoading ?
+                  <div className="w-full flex items-center justify-center gap-2 pt-2 text-xs text-white text-opacity-50">
+                    <Spin size='small' /> loading accounts...
+                  </div> :
+                  <p className='text-[8px] opacity-50 w-full text-center'>No Stake Account Yet</p>
             }
           </div> : null
       }
 
 
       {
-        !wallet.connected ? null : <div className="w-full border border-white border-opacity-10">
-          <div className="w-full flex flex-row items-center justify-between gap-2">
-            <button onClick={handleStake} className='!w-[48%] btn gradientBG text-white disabled:cursor-not-allowed'>Stake</button>
-            <button className='!w-[48%] btn btn-ghost border border-white border-opacity-10 disabled:cursor-not-allowed'>Unstake</button>
-          </div>
-        </div>
+        wallet.connected ? (
+          isLoading ?
+            <div className="w-full border border-white border-opacity-10">
+              <div className="w-full flex flex-row items-center justify-between gap-2">
+                <button disabled={buttonsDisabled} onClick={handleStake} className='!w-[48%] btn gradientBG text-white disabled:cursor-not-allowed'>Stake</button>
+                <button disabled={buttonsDisabled} className='!w-[48%] btn btn-ghost border border-white border-opacity-10 disabled:cursor-not-allowed'>Unstake</button>
+              </div>
+            </div> : null
+        ) : null
       }
 
       <div className="w-full flex flex-col items-center justify-center gap-2 p-2 bg-brand-bg bg-opacity-[0.05] backdrop-blur-lg rounded-md border border-white border-opacity-10">
         <div className='w-full flex flex-row items-center justify-center gap-2 '>
           {
-            wallet.connected ? <p>Your Rewards</p> : <input
+            wallet.connected ? <p>Calculate Rewards</p> : <input
               type="text"
               placeholder='Calculate Rewards'
               value={inputValue}
@@ -252,15 +269,15 @@ function StakingModal() {
         <div className="w-full flex flex-row items-center justify-between gap-2 text-xs p-2">
           <div className="flex flex-row items-center justify-center gap-2">
             <p className='font-bold'>Daily:</p>
-            <p>{dailyReward > 0 ? dailyReward.toFixed(4) : NaN} <span className='text-[8px]'>SOL</span></p>
+            <p>{dailyReward > 0 ? dailyReward.toFixed(2) : NaN} <span className='text-[8px]'>SOL</span></p>
           </div>
           <div className="flex flex-row items-center justify-center gap-2">
             <p className='font-bold'>Weekly:</p>
-            <p>{weeklyReward > 0 ? weeklyReward.toFixed(4) : NaN} <span className='text-[8px]'>SOL</span></p>
+            <p>{weeklyReward > 0 ? weeklyReward.toFixed(2) : NaN} <span className='text-[8px]'>SOL</span></p>
           </div>
           <div className="flex flex-row items-center justify-center gap-2">
             <p className='font-bold'>Monthly:</p>
-            <p>{monthlyReward > 0 ? monthlyReward.toFixed(4) : NaN} <span className='text-[8px]'>SOL</span></p>
+            <p>{monthlyReward > 0 ? monthlyReward.toFixed(2) : NaN} <span className='text-[8px]'>SOL</span></p>
           </div>
         </div>
       </div>

@@ -37,7 +37,7 @@ export default function Header() {
         <div className="absolute -right-20 -top-40 flex items-center justify-center">
           <div className="w-1/3 h-1/3 blur-3xl absolute z-20 bg-brand-bg rounded-full"></div>
         </div>
-        <div className="max-w-6xl backdrop-blur-lg relative z-40 text-center bg-transparent rounded-lg shadow-lg border border-0.5 border-gray-300 dark:border-gray-800 border-opacity-30 p-[1.25rem]">
+        <div className="max-w-6xl mx-4 lg:mx-0 backdrop-blur-lg relative z-40 text-center bg-transparent rounded-lg shadow-lg border border-0.5 border-gray-300 dark:border-gray-800 border-opacity-30 p-[1.25rem]">
           <h1 className="">SUPERTEAM <span className='gradientText'>GERMANY</span> X STAKING <span className='gradientText'>FACILITIES</span> VALIDATOR</h1>
         </div>
         <p className='max-w-3xl text-center  opacity-60 mt-4 backdrop-blur-sm'>Staking is the easiest and safest way to be rewarded for securing the Solana network. Staking with our validator directly funds Public Good projects on Solana through our <a href='#' target='_blank' className='underline tooltip tooltip-info' data-tip='Link to the Grants Program'>grant program</a>.</p>
