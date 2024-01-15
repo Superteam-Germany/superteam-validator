@@ -9,7 +9,7 @@ require("@solana/wallet-adapter-react-ui/styles.css");
 
 export const metadata = {
   title: 'Superteam Validator',
-  description: 'Superteam Validator',
+  description: 'Superteam Validator is a Solana validator node run by the Superteam community.',
 };
 
 export default async function RootLayout({ children }: any) {
