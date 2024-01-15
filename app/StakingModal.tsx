@@ -90,7 +90,7 @@ function StakingModal() {
     //       console.error(err);
     //     });
     // }
-  }, [wallet.connected, wallet.publicKey, stakeAccount, balance])
+  }, [wallet.connected, wallet.publicKey, stakeAccount])
 
 
 
@@ -209,7 +209,7 @@ function StakingModal() {
           <div className="w-full rounded-md border-opacity-20">
             <div className='flex flex-row items-center justify-center gap-2 '>
               <input
-                type="text"
+                type="number"
                 placeholder='0 SOL'
                 className='bg-transparent text-xs w-full flex text-center items-center justify-center input input-bordered border-opacity-10'
                 onChange={(e) => {
@@ -239,13 +239,12 @@ function StakingModal() {
 
       {
         wallet.connected ? (
-          isLoading ?
-            <div className="w-full border border-white border-opacity-10">
-              <div className="w-full flex flex-row items-center justify-between gap-2">
-                <button disabled={buttonsDisabled} onClick={handleStake} className='!w-[48%] btn gradientBG text-white disabled:cursor-not-allowed'>Stake</button>
-                <button disabled={buttonsDisabled} className='!w-[48%] btn btn-ghost border border-white border-opacity-10 disabled:cursor-not-allowed'>Unstake</button>
-              </div>
-            </div> : null
+          <div className="w-full border border-white border-opacity-10">
+            <div className="w-full flex flex-row items-center justify-between gap-2">
+              <button disabled={buttonsDisabled} onClick={handleStake} className='!w-[48%] btn gradientBG text-white disabled:cursor-not-allowed'>Stake</button>
+              <button disabled={buttonsDisabled} className='!w-[48%] btn btn-ghost border border-white border-opacity-10 disabled:cursor-not-allowed'>Unstake</button>
+            </div>
+          </div>
         ) : null
       }
 
