@@ -21,6 +21,8 @@ function StakingModal() {
     account: AccountInfo<Buffer | ParsedAccountData>;
   }[]>([]);
 
+  console.log(stakeAccount, "stakeAccount")
+
   const [isLoadingStakeAccount, setLoadingStakeAccount] = useState(false);
   const [isLoadingTx, setLoadingTx] = useState(false);
   const [reload, setReload] = useState(0);
@@ -78,11 +80,11 @@ function StakingModal() {
 
             if (epoch.epoch <= activationEpoch && activationEpoch !== deactivationEpoch) {
               totalActivating += balance;
-            } else if (epoch.epoch < deactivationEpoch) {
+            } else if (epoch.epoch <= deactivationEpoch && activationEpoch !== deactivationEpoch) {
               totalDeactivating += balance;
             } else if (epoch.epoch >= activationEpoch && deactivationEpoch === "18446744073709551615") {
               totalStaked += balance;
-            } else if ((epoch.epoch > activationEpoch || activationEpoch === deactivationEpoch) && deactivationEpoch !== "18446744073709551615") {
+            } else if ((epoch.epoch > deactivationEpoch || activationEpoch === deactivationEpoch) && deactivationEpoch !== "18446744073709551615") {
               totalWithdrawable += balance;
             }
           });
@@ -208,7 +210,7 @@ function StakingModal() {
 
       if (balances.staked + balances.activating <= 0) {
         throw new Error("You don't have any stake to deactivate")
-        
+
       }
 
       setLoadingTx(true);
