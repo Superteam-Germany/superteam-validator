@@ -1,6 +1,6 @@
 'use client'
 
-import React, { useEffect, useState } from 'react'
+import React, { useEffect, useMemo, useState } from 'react'
 import MyMultiButton from '../components/MyMultiButton'
 import Stats from './Stats'
 import { useWallet } from '@solana/wallet-adapter-react'
@@ -19,7 +19,7 @@ function StakingModal() {
   const [stakeAccount, setStakeAccount] = useState<{
     pubkey: PublicKey;
     account: AccountInfo<Buffer | ParsedAccountData>;
-  } | null>(null);
+  }[]>([]);
 
   console.log(stakeAccount, "stakeAccount");
 
@@ -30,9 +30,10 @@ function StakingModal() {
   const [inputValue, setInputValue] = useState('');
   const yearlyRewardRate = 0.0722; // 3% yearly reward
 
-  const dailyReward = (Number(inputValue) * yearlyRewardRate) / 365;
-  const weeklyReward = dailyReward * 7;
-  const monthlyReward = dailyReward * 30;
+  const totalStakedAndActivating = useMemo(() => balances.staked + balances.activating + Number(inputValue), [balances, inputValue]);
+  const dailyReward = useMemo(() => (totalStakedAndActivating * yearlyRewardRate) / 365, [totalStakedAndActivating, yearlyRewardRate]);
+  const weeklyReward = useMemo(() => dailyReward * 7, [dailyReward]);
+  const monthlyReward = useMemo(() => dailyReward * 30, [dailyReward]);
 
   useEffect(() => {
     const validatorPubKey = new PublicKey(process.env.NEXT_PUBLIC_VALIDATOR_PUBKEY!);
@@ -67,7 +68,8 @@ function StakingModal() {
 
         const filteredAccounts = accounts.filter((account) => (account.account.data as ParsedAccountData).parsed.info.stake.delegation.voter === validatorPubKey.toBase58());
         if (filteredAccounts.length) {
-          setStakeAccount(filteredAccounts[0])
+          setStakeAccount(filteredAccounts)
+          // TODO
           const balance = filteredAccounts[0].account.lamports / LAMPORTS_PER_SOL;
 
           const stakeAcountData = filteredAccounts[0].account.data as ParsedAccountData;
@@ -75,27 +77,34 @@ function StakingModal() {
           const activationEpoch = stakeAcountData.parsed.info.stake.delegation.activationEpoch;
           const deactivationEpoch = stakeAcountData.parsed.info.stake.delegation.deactivationEpoch;
 
-          let staked = 0;
-          let activating = 0;
-          let deactivating = 0;
-          let withdrawable = 0;
+          let totalStaked = 0;
+          let totalActivating = 0;
+          let totalDeactivating = 0;
+          let totalWithdrawable = 0;
 
-          if (epoch.epoch <= activationEpoch) {
-            activating = balance;
-          } else if (epoch.epoch < deactivationEpoch) {
-            deactivating = balance;
-          } else if (epoch.epoch >= activationEpoch && deactivationEpoch === "18446744073709551615") {
-            staked = balance;
-          } else if (epoch.epoch > activationEpoch && deactivationEpoch !== "18446744073709551615") {
-            withdrawable = balance;
-          }
+          filteredAccounts.forEach(account => {
+            const balance = account.account.lamports / LAMPORTS_PER_SOL;
+            const stakeAccountData = account.account.data as ParsedAccountData;
+            const activationEpoch = stakeAccountData.parsed.info.stake.delegation.activationEpoch;
+            const deactivationEpoch = stakeAccountData.parsed.info.stake.delegation.deactivationEpoch;
+
+            if (epoch.epoch <= activationEpoch) {
+              totalActivating += balance;
+            } else if (epoch.epoch < deactivationEpoch) {
+              totalDeactivating += balance;
+            } else if (epoch.epoch >= activationEpoch && deactivationEpoch === "18446744073709551615") {
+              totalStaked += balance;
+            } else if (epoch.epoch > activationEpoch && deactivationEpoch !== "18446744073709551615") {
+              totalWithdrawable += balance;
+            }
+          });
 
           setBalances({
-            staked,
-            activating,
-            deactivating,
-            withdrawable
-          })
+            staked: totalStaked,
+            activating: totalActivating,
+            deactivating: totalDeactivating,
+            withdrawable: totalWithdrawable
+          });
         }
         setLoadingStakeAccount(false);
       } catch (error) {
@@ -118,40 +127,33 @@ function StakingModal() {
 
       setLoadingTx(true);
 
+      console.log("Amount", Number(inputValue) * LAMPORTS_PER_SOL);
+
+
       const connection = new Connection(process.env.NEXT_PUBLIC_HELIUS_URL!, { commitment: "finalized" })
       const validatorPubKey = new PublicKey(process.env.NEXT_PUBLIC_VALIDATOR_PUBKEY!)
       let transaction = new Transaction();
       let stakeAccountKey;
       let newStakeAccountKP;
       // Create a new stake account if it doesn't exist
-      if (!stakeAccount) {
-        console.log('Creating a new stake account')
-        const stakeAccount = Keypair.generate();
-        stakeAccountKey = stakeAccount.publicKey;
-        const createStakeAccountInstruction = StakeProgram.createAccount({
-          fromPubkey: wallet.publicKey,
-          stakePubkey: stakeAccountKey,
-          authorized: {
-            staker: wallet.publicKey,
-            withdrawer: wallet.publicKey,
-          },
-          lamports: Number(inputValue) * LAMPORTS_PER_SOL,
-          lockup: new Lockup(0, 0, wallet.publicKey), // Optional. We'll set this to 0 for demonstration purposes.
-        });
+      console.log('Creating a new stake account')
+      const stakeAccount = Keypair.generate();
+      stakeAccountKey = stakeAccount.publicKey;
+      const createStakeAccountInstruction = StakeProgram.createAccount({
+        fromPubkey: wallet.publicKey,
+        stakePubkey: stakeAccountKey,
+        authorized: {
+          staker: wallet.publicKey,
+          withdrawer: wallet.publicKey,
+        },
+        lamports: Number(inputValue) * LAMPORTS_PER_SOL,
+        lockup: new Lockup(0, 0, wallet.publicKey), // Optional. We'll set this to 0 for demonstration purposes.
+      });
 
-
-        // Add the create account instruction to a transaction
-        console.log('Adding instructions to transaction')
-        newStakeAccountKP = stakeAccount;
-        transaction.add(createStakeAccountInstruction);
-
-
-
-        // Update the stakeAccount state
-      } else {
-        stakeAccountKey = stakeAccount.pubkey;
-        console.log('Using existing stake account', stakeAccountKey)
-      }
+      // Add the create account instruction to a transaction
+      console.log('Adding instructions to transaction')
+      newStakeAccountKP = stakeAccount;
+      transaction.add(createStakeAccountInstruction);
 
       console.log('Delegating stake to validator')
       // Delegate stake to the validator
@@ -181,7 +183,14 @@ function StakingModal() {
       console.log('Signing transaction..')
       const signedTransaction = await wallet.signTransaction(transaction);
       const transactionId = await connection.sendRawTransaction(signedTransaction.serialize());
+
       console.log('Transaction ID:', transactionId);
+
+      await connection.confirmTransaction({
+        signature: transactionId,
+        blockhash: hash.blockhash,
+        lastValidBlockHeight: hash.lastValidBlockHeight,
+      }, "finalized");
 
       setReload((prev) => prev++);
       setLoadingTx(false);
@@ -198,48 +207,73 @@ function StakingModal() {
       if (!wallet.publicKey || !stakeAccount) {
         throw new Error('Wallet public key is null or stake account is not set');
       }
-
+  
       if (!stakeAccount) {
         throw new Error('No Stakeaccount');
       }
-
+  
       setLoadingTx(true);
-
+  
       const connection = new Connection(process.env.NEXT_PUBLIC_HELIUS_URL!, { commitment: "finalized" })
-
-      // Deactivate the stake
-      const deactivateInstruction = StakeProgram.deactivate({
-        stakePubkey: stakeAccount.pubkey,
-        authorizedPubkey: wallet.publicKey,
-      });
-
-      // Withdraw the stake
-      const withdrawInstruction = StakeProgram.withdraw({
-        stakePubkey: stakeAccount.pubkey,
-        authorizedPubkey: wallet.publicKey,
-        toPubkey: wallet.publicKey,
-        lamports: Number(inputValue) * LAMPORTS_PER_SOL, // Withdraw the full balance at the time of the transaction
-      });
-
-      // Add both instructions to a transaction
+  
+      let amountToUnstake = Number(inputValue) * LAMPORTS_PER_SOL; // Amount to unstake in lamports
+  
       const transaction = new Transaction();
-      transaction.add(deactivateInstruction);
-      transaction.add(withdrawInstruction);
-
+  
+      for (const account of stakeAccount) {
+        if (amountToUnstake <= 0) {
+          break;
+        }
+  
+        const balance = account.account.lamports;
+  
+        if (balance <= amountToUnstake) {
+          // Deactivate the stake
+          const deactivateInstruction = StakeProgram.deactivate({
+            stakePubkey: account.pubkey,
+            authorizedPubkey: wallet.publicKey,
+          });
+  
+          // Withdraw the stake
+          const withdrawInstruction = StakeProgram.withdraw({
+            stakePubkey: account.pubkey,
+            authorizedPubkey: wallet.publicKey,
+            toPubkey: wallet.publicKey,
+            lamports: balance, // Withdraw the full balance of the stake account
+          });
+  
+          // Add both instructions to the transaction
+          transaction.add(deactivateInstruction);
+          transaction.add(withdrawInstruction);
+  
+          amountToUnstake -= balance;
+        }
+      }
+  
+      if (amountToUnstake > 0) {
+        throw new Error('Not enough staked SOL to unstake the desired amount');
+      }
+  
       // Get recent blockhash
       const hash = await connection.getLatestBlockhash();
-
+  
       transaction.recentBlockhash = hash.blockhash;
       transaction.feePayer = wallet.publicKey;
-
+  
       // Sign and send the transaction
       if (!wallet || !wallet.signTransaction) {
         throw new Error('Wallet is not connected or signTransaction function is not available');
       }
       const signedTransaction = await wallet.signTransaction(transaction);
-      const transactionId = await connection.sendRawTransaction(signedTransaction.serialize(), { skipPreflight: true });
+      const transactionId = await connection.sendRawTransaction(signedTransaction.serialize());
       console.log('Transaction ID:', transactionId);
 
+      await connection.confirmTransaction({
+        signature: transactionId,
+        blockhash: hash.blockhash,
+        lastValidBlockHeight: hash.lastValidBlockHeight,
+      }, "finalized");
+  
       setReload((prev) => prev++);
       setLoadingTx(false);
       toast.success('Unstaked successfully')
@@ -254,10 +288,10 @@ function StakingModal() {
     <div className="relative z-50 w-full scale-110 flex items-center justify-center gap-4 max-w-md mt-10 card p-4 mx-auto bg-brand-bg backdrop-blur-xl bg-opacity-50 border border-white border-opacity-40">
       {/* Calculate Rewards */}
       {
-        !wallet.publicKey ? <div className="w-full flex flex-col items-center justify-center gap-2 p-2 bg-brand-bg bg-opacity-[0.05] backdrop-blur-lg rounded-md border border-white border-opacity-10">
+        <div className="w-full flex flex-col items-center justify-center gap-2 p-2 bg-brand-bg bg-opacity-[0.05] backdrop-blur-lg rounded-md border border-white border-opacity-10">
           <div className='w-full flex flex-row items-center justify-center gap-2 '>
             {
-              wallet.connected ? <p>Calculate Rewards</p> : <input
+              wallet.connected ? <p>{stakeAccount.length ? "Your Rewards" : "Calculate Reward"}</p> : <input
                 type="text"
                 placeholder='Calculate Rewards'
                 value={inputValue}
@@ -274,18 +308,18 @@ function StakingModal() {
           <div className="w-full flex flex-row items-center justify-between gap-2 text-xs p-2">
             <div className="flex flex-row items-center justify-center gap-2">
               <p className='font-bold'>Daily:</p>
-              <p>{dailyReward > 0 ? dailyReward.toFixed(2) : "-"} <span className='text-[8px]'>SOL</span></p>
+              <p>{dailyReward > 0 ? dailyReward.toFixed(4) : "-"} <span className='text-[8px]'>SOL</span></p>
             </div>
             <div className="flex flex-row items-center justify-center gap-2">
               <p className='font-bold'>Weekly:</p>
-              <p>{weeklyReward > 0 ? weeklyReward.toFixed(2) : "-"} <span className='text-[8px]'>SOL</span></p>
+              <p>{weeklyReward > 0 ? weeklyReward.toFixed(4) : "-"} <span className='text-[8px]'>SOL</span></p>
             </div>
             <div className="flex flex-row items-center justify-center gap-2">
               <p className='font-bold'>Monthly:</p>
-              <p>{monthlyReward > 0 ? monthlyReward.toFixed(2) : "-"} <span className='text-[8px]'>SOL</span></p>
+              <p>{monthlyReward > 0 ? monthlyReward.toFixed(4) : "-"} <span className='text-[8px]'>SOL</span></p>
             </div>
           </div>
-        </div> : null
+        </div>
       }
       {/* Stake Input */}
       {

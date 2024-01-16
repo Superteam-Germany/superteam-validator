@@ -329,3 +329,7 @@ background-clip: text;
 .appBarB {
   background: radial-gradient(5749358.98% 43200% at 50% 50.26%, #EDEBEB 0%, rgba(237, 235, 235, 0.00) 57.5%);
 }
+
+.and-spin-dot {
+  @apply !text-brand-secondary;
+}
