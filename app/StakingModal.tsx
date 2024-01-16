@@ -22,7 +22,11 @@ function StakingModal() {
   }[]>([]);
 
 
-  const [isLoadingStakeAccount, setLoadingStakeAccount] = useState(false);
+  const [loadingStates, setLoadingStates] = useState({
+    stakeAccount: false,
+    stakeTx: false,
+    unstakeTx: false,
+  });
   const [isLoadingTx, setLoadingTx] = useState(false);
   const [reload, setReload] = useState(0);
 
@@ -42,7 +46,7 @@ function StakingModal() {
 
     async function getStakeAccount() {
       try {
-        setLoadingStakeAccount(true);
+        setLoadingStates(prev => ({ ...prev, stakeAccount: true }));
 
         const connection = new Connection(process.env.NEXT_PUBLIC_HELIUS_URL!, "processed");
 
@@ -98,10 +102,10 @@ function StakingModal() {
             withdrawable: totalWithdrawable
           });
         }
-        setLoadingStakeAccount(false);
+        setLoadingStates(prev => ({ ...prev, stakeAccount: false }));
       } catch (error) {
         console.log(error, "error")
-        setLoadingStakeAccount(false);
+        setLoadingStates(prev => ({ ...prev, stakeAccount: false }));
       }
     }
     if (wallet.publicKey) {
@@ -123,7 +127,7 @@ function StakingModal() {
         throw new Error("You don't have enough SOL to stake")
       }
 
-      setLoadingTx(true);
+      setLoadingStates(prev => ({ ...prev, stakeTx: true }));
 
       const connection = new Connection(process.env.NEXT_PUBLIC_HELIUS_URL!)
       const validatorPubKey = new PublicKey(process.env.NEXT_PUBLIC_VALIDATOR_PUBKEY!)
@@ -188,11 +192,11 @@ function StakingModal() {
       }, "finalized");
 
       setReload((prev) => prev + 1);
-      setLoadingTx(false);
+      setLoadingStates(prev => ({ ...prev, stakeTx: false }));
       toast.success('Staked successfully')
     } catch (error) {
       console.log(error, "error");
-      setLoadingTx(false);
+      setLoadingStates(prev => ({ ...prev, stakeTx: false }));
       toast.error((error as Error).message);
     }
   }
@@ -212,7 +216,7 @@ function StakingModal() {
 
       }
 
-      setLoadingTx(true);
+      setLoadingStates(prev => ({ ...prev, unstakeTx: true }));
 
       const connection = new Connection(process.env.NEXT_PUBLIC_HELIUS_URL!)
 
@@ -249,11 +253,11 @@ function StakingModal() {
       }, "finalized");
 
       setReload((prev) => prev + 1);
-      setLoadingTx(false);
+      setLoadingStates(prev => ({ ...prev, unstakeTx: false }));
       toast.success('Unstaked successfully')
     } catch (error) {
       console.log(error, "error");
-      setLoadingTx(false);
+      setLoadingStates(prev => ({ ...prev, unstakeTx: false }));
       toast.error((error as Error).message);
     }
   }
@@ -342,7 +346,7 @@ function StakingModal() {
         <div className="w-full flex flex-col items-center justify-center gap-2 p-2 bg-brand-bg bg-opacity-[0.05] backdrop-blur-lg rounded-md border border-white border-opacity-10">
           <div className='w-full flex flex-row items-center justify-center gap-2 '>
             {
-              wallet.connected && !isLoadingStakeAccount ? <p>{stakeAccount.length ? "Your Rewards" : "Calculate Reward"}</p> : <input
+              wallet.connected && !loadingStates.stakeAccount ? <p>{stakeAccount.length ? "Your Rewards" : "Calculate Reward"}</p> : <input
                 type="text"
                 placeholder='Calculate Rewards'
                 value={inputValue}
@@ -374,7 +378,7 @@ function StakingModal() {
       }
       {/* Stake Input */}
       {
-        wallet.connected && !isLoadingStakeAccount ?
+        wallet.connected && !loadingStates.stakeAccount ?
           <div className="w-full rounded-md border-opacity-20">
             <div className='flex flex-row items-center justify-center gap-2 '>
               <input
@@ -393,14 +397,14 @@ function StakingModal() {
       }
       {/* Stake Buttons */}
       {
-        wallet.connected && !isLoadingStakeAccount ? (
+        wallet.connected && !loadingStates.stakeAccount ? (
           <div className="w-full border border-white border-opacity-10">
             <div className="w-full flex flex-row items-center justify-between gap-2">
-              <button disabled={isLoadingStakeAccount || isLoadingTx} onClick={handleStake} className='!w-[48%] btn gradientBG text-white disabled:cursor-not-allowed flex flex-row items-center justify-center gap-2'>{isLoadingTx ? <Spin /> : null}Stake</button>
+              <button disabled={loadingStates.stakeAccount || loadingStates.stakeTx} onClick={handleStake} className='!w-[48%] btn gradientBG text-white disabled:cursor-not-allowed flex flex-row items-center justify-center gap-2'>{loadingStates.stakeTx ? <Spin /> : null}Stake</button>
               {balances.withdrawable === 0 ?
-                <button disabled={isLoadingStakeAccount || isLoadingTx || balances.staked + balances.activating <= 0} onClick={handleDeactivateAll} className='!w-[48%] btn btn-ghost border border-white border-opacity-10 disabled:cursor-not-allowed flex flex-row items-center justify-center gap-2'>{isLoadingTx ? <Spin /> : null}Deactivate All</button>
+                <button disabled={loadingStates.stakeAccount || loadingStates.unstakeTx || balances.staked + balances.activating <= 0} onClick={handleDeactivateAll} className='!w-[48%] btn btn-ghost border border-white border-opacity-10 disabled:cursor-not-allowed flex flex-row items-center justify-center gap-2'>{loadingStates.unstakeTx ? <Spin /> : null}Deactivate All</button>
                 :
-                <button disabled={isLoadingStakeAccount || isLoadingTx} onClick={handleWithdraw} className='!w-[48%] btn btn-ghost border border-white border-opacity-10 disabled:cursor-not-allowed flex flex-row items-center justify-center gap-2'>{isLoadingTx ? <Spin /> : null}Withdraw</button>
+                <button disabled={loadingStates.stakeAccount || loadingStates.unstakeTx} onClick={handleWithdraw} className='!w-[48%] btn btn-ghost border border-white border-opacity-10 disabled:cursor-not-allowed flex flex-row items-center justify-center gap-2'>{loadingStates.unstakeTx ? <Spin /> : null}Withdraw</button>
               }
             </div>
           </div>
@@ -411,7 +415,7 @@ function StakingModal() {
         wallet.publicKey ? <>
           <div className="w-full">
             {
-              !isLoadingStakeAccount ?
+              !loadingStates.stakeAccount ?
                 <div className='w-full grid grid-cols-2 gap-2 mt-2 '>
                   {!stakeAccount && <p className='text-[8px] opacity-50 w-full text-center'>No Stake Account Yet</p>}
                   {/* <h2>Stake</h2> */}
