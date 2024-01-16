@@ -27,7 +27,7 @@ export default function Header() {
           }
         `}
       </style>
-      <section id='header' className="overflow-hidden header relative flex w-full flex-col items-center justify-center gap-4" style={{ height: "calc(100vh - 150px)" }}>
+      <section id='header' className="overflow-hidden header relative flex w-full flex-col items-center justify-start gap-4 min-h-[80vh] pt-10 lg:pt-20" >
         <div className="absolute inset-0 z-0 animated pointer-events-none ">
           <Image src="/images/capa1.svg" alt="texture" height={1920} width={1080} />
         </div>
