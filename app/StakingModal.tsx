@@ -207,33 +207,33 @@ function StakingModal() {
       if (!wallet.publicKey || !stakeAccount) {
         throw new Error('Wallet public key is null or stake account is not set');
       }
-  
+
       if (!stakeAccount) {
         throw new Error('No Stakeaccount');
       }
-  
+
       setLoadingTx(true);
-  
+
       const connection = new Connection(process.env.NEXT_PUBLIC_HELIUS_URL!, { commitment: "finalized" })
-  
+
       let amountToUnstake = Number(inputValue) * LAMPORTS_PER_SOL; // Amount to unstake in lamports
-  
+
       const transaction = new Transaction();
-  
+
       for (const account of stakeAccount) {
         if (amountToUnstake <= 0) {
           break;
         }
-  
+
         const balance = account.account.lamports;
-  
+
         if (balance <= amountToUnstake) {
           // Deactivate the stake
           const deactivateInstruction = StakeProgram.deactivate({
             stakePubkey: account.pubkey,
             authorizedPubkey: wallet.publicKey,
           });
-  
+
           // Withdraw the stake
           const withdrawInstruction = StakeProgram.withdraw({
             stakePubkey: account.pubkey,
@@ -241,25 +241,25 @@ function StakingModal() {
             toPubkey: wallet.publicKey,
             lamports: balance, // Withdraw the full balance of the stake account
           });
-  
+
           // Add both instructions to the transaction
           transaction.add(deactivateInstruction);
           transaction.add(withdrawInstruction);
-  
+
           amountToUnstake -= balance;
         }
       }
-  
+
       if (amountToUnstake > 0) {
         throw new Error('Not enough staked SOL to unstake the desired amount');
       }
-  
+
       // Get recent blockhash
       const hash = await connection.getLatestBlockhash();
-  
+
       transaction.recentBlockhash = hash.blockhash;
       transaction.feePayer = wallet.publicKey;
-  
+
       // Sign and send the transaction
       if (!wallet || !wallet.signTransaction) {
         throw new Error('Wallet is not connected or signTransaction function is not available');
@@ -273,7 +273,7 @@ function StakingModal() {
         blockhash: hash.blockhash,
         lastValidBlockHeight: hash.lastValidBlockHeight,
       }, "finalized");
-  
+
       setReload((prev) => prev++);
       setLoadingTx(false);
       toast.success('Unstaked successfully')
@@ -291,7 +291,7 @@ function StakingModal() {
         <div className="w-full flex flex-col items-center justify-center gap-2 p-2 bg-brand-bg bg-opacity-[0.05] backdrop-blur-lg rounded-md border border-white border-opacity-10">
           <div className='w-full flex flex-row items-center justify-center gap-2 '>
             {
-              wallet.connected ? <p>{stakeAccount.length ? "Your Rewards" : "Calculate Reward"}</p> : <input
+              wallet.connected && !isLoadingStakeAccount ? <p>{stakeAccount.length ? "Your Rewards" : "Calculate Reward"}</p> : <input
                 type="text"
                 placeholder='Calculate Rewards'
                 value={inputValue}
@@ -345,8 +345,8 @@ function StakingModal() {
         wallet.connected && !isLoadingStakeAccount ? (
           <div className="w-full border border-white border-opacity-10">
             <div className="w-full flex flex-row items-center justify-between gap-2">
-              <button disabled={isLoadingStakeAccount || isLoadingTx} onClick={handleStake} className='!w-[48%] btn gradientBG text-white disabled:cursor-not-allowed flex flex-row items-center justify-center gap-2'>{isLoadingTx ? <Spin /> : null}Stake</button>
-              <button disabled={isLoadingStakeAccount || isLoadingTx} onClick={handleUnstake} className='!w-[48%] btn btn-ghost border border-white border-opacity-10 disabled:cursor-not-allowed flex flex-row items-center justify-center gap-2'>{isLoadingTx ? <Spin /> : null}Unstake</button>
+              <button disabled={isLoadingStakeAccount || isLoadingTx} onClick={handleStake} className='!w-[48%] btn gradientBG text-white disabled:cursor-not-allowed flex flex-row items-center justify-center gap-2'>{isLoadingTx ? <Spin size='small' delay={10} /> : null}Stake</button>
+              <button disabled={isLoadingStakeAccount || isLoadingTx} onClick={handleUnstake} className='!w-[48%] btn btn-ghost border border-white border-opacity-10 disabled:cursor-not-allowed flex flex-row items-center justify-center gap-2'>{isLoadingTx ? <Spin size='small' delay={10} /> : null}Unstake</button>
             </div>
           </div>
         ) : null
@@ -361,9 +361,9 @@ function StakingModal() {
                   {!stakeAccount && <p className='text-[8px] opacity-50 w-full text-center'>No Stake Account Yet</p>}
                   {/* <h2>Stake</h2> */}
                   <p className='text-[12px] font-bold opacity-50 bg-black bg-opacity-10 p-0.5 text-center'>Staked: {balances.staked.toFixed(2) || "X"} SOL</p>
-                  {balances.activating > 0 && <p className='text-[12px] font-bold opacity-50 bg-black bg-opacity-10 p-0.5 text-center'>Activating: {balances.activating.toFixed(2)} SOL</p>}
                   {balances.deactivating > 0 && <p className='text-[12px] font-bold opacity-50 bg-black bg-opacity-10 p-0.5 text-center'>Deactivating: {balances.deactivating.toFixed(2)} SOL</p>}
-                  {balances.withdrawable > 0 && <p className='text-[12px] font-bold opacity-50 bg-black bg-opacity-10 p-0.5 text-center'>Ready to withdraw: {balances.withdrawable.toFixed(2)} SOL</p>}
+                  {balances.activating > 0 && <p className='text-[12px] font-bold opacity-50 bg-black bg-opacity-10 p-0.5 text-center'>Activating: {balances.activating.toFixed(2)} SOL</p>}
+                  {balances.withdrawable > 0 && <p className='text-[12px] font-bold opacity-50 bg-black bg-opacity-10 p-0.5 text-center'>Withdrawable: {balances.withdrawable.toFixed(2)} SOL</p>}
                 </div>
                 :
                 <div className="w-full flex items-center justify-center gap-2 py-2 text-xs text-white text-opacity-50">

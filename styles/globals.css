@@ -53,7 +53,7 @@ select {
 
 /* Active navigation link */
 .active {
-  @apply text-[#43b083] dark:text-[#14F195];
+  @apply text-brand-secondary dark:text-brand-secondary;
 }
 
 /* Custom Wallet Button */
@@ -68,7 +68,7 @@ html {
 body {
   background-color: transparent;
     font-family: 'Satoshi-Variable', sans-serif;
-          @apply bg-[#141414] text-white  selection:bg-builderz-blue selection:text-white selection:px-4 dark:selection:text-black;
+          @apply bg-[#141414] text-white  selection:bg-brand-secondary selection:text-white selection:px-4 dark:selection:text-black;
 
   /* margin: 0; */
   /* Fluid Fonts */
@@ -130,7 +130,7 @@ body::-webkit-scrollbar-thumb {
 
 /* NavigationLink Hover */
 .navLink {
-  @apply px-2 py-1 rounded-md hover:text-[#43b083] dark:hover:text-[#14F195] bg-opacity-20;
+  @apply px-2 py-1 rounded-md hover:text-brand-secondary dark:hover:text-brand-secondary bg-opacity-20;
 }
 
 
@@ -330,6 +330,6 @@ background-clip: text;
   background: radial-gradient(5749358.98% 43200% at 50% 50.26%, #EDEBEB 0%, rgba(237, 235, 235, 0.00) 57.5%);
 }
 
-.and-spin-dot {
-  @apply !text-brand-secondary;
+.and-spin-dot .ant-spin-spinning {
+  @apply !text-brand-main;
 }
