@@ -21,7 +21,6 @@ function StakingModal() {
     account: AccountInfo<Buffer | ParsedAccountData>;
   }[]>([]);
 
-  console.log(stakeAccount, "stakeAccount")
 
   const [isLoadingStakeAccount, setLoadingStakeAccount] = useState(false);
   const [isLoadingTx, setLoadingTx] = useState(false);
