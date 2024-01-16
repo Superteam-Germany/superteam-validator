@@ -6,16 +6,18 @@ import Stats from './Stats'
 import { useWallet } from '@solana/wallet-adapter-react'
 import { Connection, PublicKey, StakeProgram, SystemProgram, Transaction, sendAndConfirmTransaction, LAMPORTS_PER_SOL, Keypair, Lockup, clusterApiUrl, ParsedAccountData, AccountInfo } from '@solana/web3.js'
 import { Spin } from 'antd'
+import { toast } from 'sonner'
 
 function StakingModal() {
   const wallet = useWallet()
   const [balance, setBalance] = useState(0)
   const [isOpen, setIsOpen] = useState(false);
   const [stakeAccount, setStakeAccount] = useState<{
-    pubkey: PublicKey | undefined;
+    pubkey: PublicKey;
     account: AccountInfo<Buffer | ParsedAccountData>;
-  }[]>([]);
+  } | null>(null);
   const [isLoading, setLoading] = useState(false);
+  const [reload, setReload] = useState(0);
 
   const [inputValue, setInputValue] = useState('');
   const yearlyRewardRate = 0.0722; // 3% yearly reward
@@ -26,17 +28,16 @@ function StakingModal() {
 
   useEffect(() => {
     setLoading(true);
-    const validatorPubKey = new PublicKey("Ehdn9LdjTAURQSMoDPERXLehtvzy7QD762wwPkzGT7RS")
+    const validatorPubKey = new PublicKey(process.env.NEXT_PUBLIC_VALIDATOR_PUBKEY!);
     const STAKE_PROGRAM_ID = new PublicKey(
       "Stake11111111111111111111111111111111111111"
     );
 
     async function getStakeAccount() {
       try {
+        setLoading(true);
 
-        ;
-
-        const connection = new Connection(process.env.NEXT_PUBLIC_HELIUS_URL || 'https://entire-jsandye-fast-mainnet.helius-rpc.com/', "confirmed");
+        const connection = new Connection(process.env.NEXT_PUBLIC_HELIUS_URL!, "confirmed");
         const accounts = await connection.getParsedProgramAccounts(STAKE_PROGRAM_ID, {
           filters: [
             {
@@ -50,12 +51,15 @@ function StakingModal() {
             },
           ],
         });
-        // const accounts = await connection.getParsedProgramAccounts(STAKE_PROGRAM_ID);
+
+        console.log(accounts, "accounts");
+        
         const filteredAccounts = accounts.filter((account) => (account.account.data as ParsedAccountData).parsed.info.stake.delegation.voter === validatorPubKey.toBase58());
-        // console.log(filteredAccounts, "filteredAccounts")
-        setStakeAccount(filteredAccounts)
-        const balance = filteredAccounts[0].account.lamports / LAMPORTS_PER_SOL;
+        if (filteredAccounts.length) {
+          setStakeAccount(filteredAccounts[0])
+          const balance = filteredAccounts[0].account.lamports / LAMPORTS_PER_SOL;
         setBalance(balance)
+        }
         setLoading(false);
       } catch (error) {
         console.log(error, "error")
@@ -64,143 +68,142 @@ function StakingModal() {
     }
     if (wallet.publicKey) {
       getStakeAccount();
-    }
-
-    // console.log('Wallet connected:', wallet.connected);
-    // if (wallet.connected && wallet.publicKey && stakeAccount) {
-    //   const connection = new Connection(process.env.NEXT_PUBLIC_HELIUS_URL || 'https://entire-jsandye-fast-mainnet.helius-rpc.com/')
-    //   const validatorPubKey = new PublicKey('73hojLdq1vZDSxeVQEqVFJ4iwLngdvEJPEpEHkSdv6BZ')
-
-    //   connection.getParsedAccountInfo(stakeAccount.publicKey, 'confirmed')
-    //     .then(accountInfo => {
-    //       if ('parsed' in accountInfo.value?.data!) {
-    //         const stakeInfo = accountInfo.value?.data.parsed.info;
-    //         if (stakeInfo && stakeInfo.delegate === validatorPubKey.toString()) {
-    //           let totalBalance = 0;
-    //           totalBalance += (stakeInfo.lamports / 10) / LAMPORTS_PER_SOL; // Convert lamports to SOL
-    //           setBalance(totalBalance);
-    //           console.log("Balance" + balance)
-    //         } else {
-    //           setBalance(0);
-    //           console.log('No Stake Account with the specified validator')
-    //         }
-    //       }
-    //     })
-    //     .catch(err => {
-    //       console.error(err);
-    //     });
-    // }
-  }, [wallet.connected, wallet.publicKey, stakeAccount])
+    } 
+  }, [wallet.publicKey, reload])
 
 
 
   const handleStake = async () => {
-    if (!wallet.publicKey) {
-      throw new Error('Wallet public key is null');
-    }
-
-    const connection = new Connection(process.env.NEXT_PUBLIC_HELIUS_URL || 'https://entire-jsandye-fast-mainnet.helius-rpc.com/')
-    const validatorPubKey = new PublicKey('73hojLdq1vZDSxeVQEqVFJ4iwLngdvEJPEpEHkSdv6BZ')
-    let transaction = new Transaction();
-    let stakeAccountKey;
-    let newStakeAccountKP;
-    // Create a new stake account if it doesn't exist
-    if (!stakeAccount) {
-      console.log('Creating a new stake account')
-      const stakeAccount = Keypair.generate();
-      stakeAccountKey = stakeAccount.publicKey;
-      const createStakeAccountInstruction = StakeProgram.createAccount({
-        fromPubkey: wallet.publicKey,
-        stakePubkey: stakeAccountKey,
-        authorized: {
-          staker: wallet.publicKey,
-          withdrawer: wallet.publicKey,
-        },
-        lamports: Number(inputValue) * LAMPORTS_PER_SOL,
-        lockup: new Lockup(0, 0, wallet.publicKey), // Optional. We'll set this to 0 for demonstration purposes.
+    try {
+      if (!wallet.publicKey) {
+        throw new Error('Wallet public key is null');
+      }
+  
+      const connection = new Connection(process.env.NEXT_PUBLIC_HELIUS_URL!)
+      const validatorPubKey = new PublicKey(process.env.NEXT_PUBLIC_VALIDATOR_PUBKEY!)
+      let transaction = new Transaction();
+      let stakeAccountKey;
+      let newStakeAccountKP;
+      // Create a new stake account if it doesn't exist
+      if (!stakeAccount) {
+        console.log('Creating a new stake account')
+        const stakeAccount = Keypair.generate();
+        stakeAccountKey = stakeAccount.publicKey;
+        const createStakeAccountInstruction = StakeProgram.createAccount({
+          fromPubkey: wallet.publicKey,
+          stakePubkey: stakeAccountKey,
+          authorized: {
+            staker: wallet.publicKey,
+            withdrawer: wallet.publicKey,
+          },
+          lamports: Number(inputValue) * LAMPORTS_PER_SOL,
+          lockup: new Lockup(0, 0, wallet.publicKey), // Optional. We'll set this to 0 for demonstration purposes.
+        });
+  
+  
+        // Add the create account instruction to a transaction
+        console.log('Adding instructions to transaction')
+        newStakeAccountKP = stakeAccount;
+        transaction.add(createStakeAccountInstruction);
+  
+  
+  
+        // Update the stakeAccount state
+      } else {
+        stakeAccountKey = stakeAccount.pubkey;
+        console.log('Using existing stake account', stakeAccountKey)
+      }
+  
+      console.log('Delegating stake to validator')
+      // Delegate stake to the validator
+      console.log(stakeAccountKey)
+      const delegateInstruction = StakeProgram.delegate({
+        stakePubkey: stakeAccountKey!,
+        authorizedPubkey: wallet.publicKey,
+        votePubkey: validatorPubKey,
       });
-
-
-      // Add the create account instruction to a transaction
       console.log('Adding instructions to transaction')
-      newStakeAccountKP = stakeAccount;
-      transaction.add(createStakeAccountInstruction);
-
-
-
-      // Update the stakeAccount state
-    } else {
-      stakeAccountKey = stakeAccount[0].pubkey;
-      console.log('Using existing stake account', stakeAccountKey)
+      // Add the delegate instruction to a transaction
+      transaction.add(delegateInstruction);
+  
+      // Get recent blockhash
+      const hash = await connection.getLatestBlockhash();
+  
+      transaction.recentBlockhash = hash.blockhash;
+      transaction.feePayer = wallet.publicKey;
+      if (newStakeAccountKP) {
+        transaction.partialSign(newStakeAccountKP);
+      }
+  
+      // Sign and send the transaction
+      if (!wallet || !wallet.signTransaction) {
+        throw new Error('Wallet is not connected or signTransaction function is not available');
+      }
+      console.log('Signing transaction..')
+      const signedTransaction = await wallet.signTransaction(transaction);
+      const transactionId = await connection.sendRawTransaction(signedTransaction.serialize());
+      console.log('Transaction ID:', transactionId);
+  
+      setReload((prev) => prev++);
+      toast.success('Staked successfully')
+    } catch (error) {
+      console.log(error, "error");
+      toast.error((error as Error).message);
     }
-
-    console.log('Delegating stake to validator')
-    // Delegate stake to the validator
-    console.log(stakeAccountKey)
-    const delegateInstruction = StakeProgram.delegate({
-      stakePubkey: stakeAccountKey!,
-      authorizedPubkey: wallet.publicKey,
-      votePubkey: validatorPubKey,
-    });
-    console.log('Adding instructions to transaction')
-    // Add the delegate instruction to a transaction
-    transaction.add(delegateInstruction);
-
-    // Get recent blockhash
-    const hash = await connection.getLatestBlockhash();
-
-    transaction.recentBlockhash = hash.blockhash;
-    transaction.feePayer = wallet.publicKey;
-    if (newStakeAccountKP) {
-      transaction.partialSign(newStakeAccountKP);
-    }
-
-    // Sign and send the transaction
-    if (!wallet || !wallet.signTransaction) {
-      throw new Error('Wallet is not connected or signTransaction function is not available');
-    }
-    console.log('Signing transaction..')
-    const signedTransaction = await wallet.signTransaction(transaction);
-    const transactionId = await connection.sendRawTransaction(signedTransaction.serialize());
-    console.log('Transaction ID:', transactionId);
   }
 
-  // const handleUnstake = async () => {
-  //   if (!wallet.publicKey || !stakeAccount) {
-  //     throw new Error('Wallet public key is null or stake account is not set');
-  //   }
-
-  //   const connection = new Connection('https://api.mainnet-beta.solana.com')
-
-  //   // Deactivate the stake
-  //   const deactivateInstruction = StakeProgram.deactivate({
-  //     stakePubkey: stakeAccount.publicKey,
-  //     authorizedPubkey: wallet.publicKey,
-  //   });
-
-  //   // Withdraw the stake
-  //   const withdrawInstruction = StakeProgram.withdraw({
-  //     stakePubkey: stakeAccount.publicKey,
-  //     authorizedPubkey: wallet.publicKey,
-  //     toPubkey: wallet.publicKey,
-  //     lamports: balance * LAMPORTS_PER_SOL, // Withdraw the full balance at the time of the transaction
-  //   });
-
-  //   // Add both instructions to a transaction
-  //   const transaction = new Transaction();
-  //   transaction.add(deactivateInstruction);
-  //   transaction.add(withdrawInstruction);
-
-  //   // Sign and send the transaction
-  //   if (!wallet || !wallet.signTransaction) {
-  //     throw new Error('Wallet is not connected or signTransaction function is not available');
-  //   }
-  //   const signedTransaction = await wallet.signTransaction(transaction);
-  //   const transactionId = await connection.sendRawTransaction(signedTransaction.serialize());
-  //   console.log('Transaction ID:', transactionId);
-  // }
-
-  const buttonsDisabled = inputValue === '' || Number(inputValue) === 0;
+  const handleUnstake = async () => {
+    try {
+      if (!wallet.publicKey || !stakeAccount) {
+        throw new Error('Wallet public key is null or stake account is not set');
+      }
+  
+      if (!stakeAccount) {
+        throw new Error('No Stakeaccount');
+      }
+  
+      const connection = new Connection(process.env.NEXT_PUBLIC_HELIUS_URL!)
+  
+      // Deactivate the stake
+      const deactivateInstruction = StakeProgram.deactivate({
+        stakePubkey: stakeAccount.pubkey,
+        authorizedPubkey: wallet.publicKey,
+      });
+  
+      // Withdraw the stake
+      const withdrawInstruction = StakeProgram.withdraw({
+        stakePubkey: stakeAccount.pubkey,
+        authorizedPubkey: wallet.publicKey,
+        toPubkey: wallet.publicKey,
+        lamports: balance * LAMPORTS_PER_SOL, // Withdraw the full balance at the time of the transaction
+      });
+  
+      // Add both instructions to a transaction
+      const transaction = new Transaction();
+      transaction.add(deactivateInstruction);
+      transaction.add(withdrawInstruction);
+  
+      // Get recent blockhash
+      const hash = await connection.getLatestBlockhash();
+  
+      transaction.recentBlockhash = hash.blockhash;
+      transaction.feePayer = wallet.publicKey;
+  
+      // Sign and send the transaction
+      if (!wallet || !wallet.signTransaction) {
+        throw new Error('Wallet is not connected or signTransaction function is not available');
+      }
+      const signedTransaction = await wallet.signTransaction(transaction);
+      const transactionId = await connection.sendRawTransaction(signedTransaction.serialize());
+      console.log('Transaction ID:', transactionId);
+  
+      setReload((prev) => prev++);
+      toast.success('Unstaked successfully')
+    } catch (error) {
+      console.log(error, "error");
+      toast.error((error as Error).message);
+    }
+  }
 
   return (
     <div className="relative z-50 w-full scale-110 flex items-center justify-center gap-4 max-w-md mt-10 card p-4 mx-auto bg-brand-bg backdrop-blur-xl bg-opacity-50 border border-white border-opacity-40">
@@ -241,8 +244,8 @@ function StakingModal() {
         wallet.connected ? (
           <div className="w-full border border-white border-opacity-10">
             <div className="w-full flex flex-row items-center justify-between gap-2">
-              <button disabled={buttonsDisabled} onClick={handleStake} className='!w-[48%] btn gradientBG text-white disabled:cursor-not-allowed'>Stake</button>
-              <button disabled={buttonsDisabled} className='!w-[48%] btn btn-ghost border border-white border-opacity-10 disabled:cursor-not-allowed'>Unstake</button>
+              <button disabled={isLoading} onClick={handleStake} className='!w-[48%] btn gradientBG text-white disabled:cursor-not-allowed'>Stake</button>
+              <button disabled={isLoading} onClick={handleUnstake} className='!w-[48%] btn btn-ghost border border-white border-opacity-10 disabled:cursor-not-allowed'>Unstake</button>
             </div>
           </div>
         ) : null
