@@ -398,16 +398,19 @@ function StakingModal() {
       {/* Stake Buttons */}
       {
         wallet.connected && !loadingStates.stakeAccount ? (
-          <div className="w-full border border-white border-opacity-10">
-            <div className="w-full flex flex-row items-center justify-between gap-2">
-              <button disabled={loadingStates.stakeAccount || loadingStates.stakeTx} onClick={handleStake} className='!w-[48%] btn gradientBG text-white disabled:cursor-not-allowed flex flex-row items-center justify-center gap-2'>{loadingStates.stakeTx ? <Spin /> : null}Stake</button>
-              {balances.withdrawable === 0 ?
-                <button disabled={loadingStates.stakeAccount || loadingStates.unstakeTx || balances.staked + balances.activating <= 0} onClick={handleDeactivateAll} className='!w-[48%] btn btn-ghost border border-white border-opacity-10 disabled:cursor-not-allowed flex flex-row items-center justify-center gap-2'>{loadingStates.unstakeTx ? <Spin /> : null}Deactivate All</button>
-                :
-                <button disabled={loadingStates.stakeAccount || loadingStates.unstakeTx} onClick={handleWithdraw} className='!w-[48%] btn btn-ghost border border-white border-opacity-10 disabled:cursor-not-allowed flex flex-row items-center justify-center gap-2'>{loadingStates.unstakeTx ? <Spin /> : null}Withdraw</button>
-              }
+          <>
+            <p className='text-[10px] font-bold opacity-50 bg-black bg-opacity-10 text-center'>Wallet Balance: {balances.yourBalance.toFixed(2) || "X"} SOL</p>
+            <div className="w-full border border-white border-opacity-10">
+              <div className="w-full flex flex-row items-center justify-between gap-2">
+                <button disabled={loadingStates.stakeAccount || loadingStates.stakeTx} onClick={handleStake} className='!w-[48%] btn gradientBG text-white disabled:cursor-not-allowed flex flex-row items-center justify-center gap-2'>{loadingStates.stakeTx ? <Spin /> : null}Stake</button>
+                {balances.withdrawable === 0 ?
+                  <button disabled={loadingStates.stakeAccount || loadingStates.unstakeTx || balances.staked + balances.activating <= 0} onClick={handleDeactivateAll} className='!w-[48%] btn btn-ghost border border-white border-opacity-10 disabled:cursor-not-allowed flex flex-row items-center justify-center gap-2'>{loadingStates.unstakeTx ? <Spin /> : null}Deactivate All</button>
+                  :
+                  <button disabled={loadingStates.stakeAccount || loadingStates.unstakeTx} onClick={handleWithdraw} className='!w-[48%] btn btn-ghost border border-white border-opacity-10 disabled:cursor-not-allowed flex flex-row items-center justify-center gap-2'>{loadingStates.unstakeTx ? <Spin /> : null}Withdraw</button>
+                }
+              </div>
             </div>
-          </div>
+          </>
         ) : null
       }
       {/* Stake Stats */}
@@ -419,7 +422,6 @@ function StakingModal() {
                 <div className='w-full grid grid-cols-2 gap-2 mt-2 '>
                   {!stakeAccount && <p className='text-[8px] opacity-50 w-full text-center'>No Stake Account Yet</p>}
                   {/* <h2>Stake</h2> */}
-                  <p className='text-[12px] font-bold opacity-50 bg-black bg-opacity-10 p-0.5 text-center'>Your Balance: {balances.yourBalance.toFixed(2) || "X"} SOL</p>
                   <p className='text-[12px] font-bold opacity-50 bg-black bg-opacity-10 p-0.5 text-center'>Staked: {balances.staked.toFixed(2) || "X"} SOL</p>
                   {balances.deactivating > 0 && <p className='text-[12px] font-bold opacity-50 bg-black bg-opacity-10 p-0.5 text-center'>Deactivating: {balances.deactivating.toFixed(2)} SOL</p>}
                   {balances.activating > 0 && <p className='text-[12px] font-bold opacity-50 bg-black bg-opacity-10 p-0.5 text-center'>Activating: {balances.activating.toFixed(2)} SOL</p>}
