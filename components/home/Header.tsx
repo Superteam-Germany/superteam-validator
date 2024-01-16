@@ -28,10 +28,10 @@ export default function Header() {
         `}
       </style>
       <section id='header' className="overflow-hidden header relative flex w-full flex-col items-center justify-center gap-4" style={{ height: "calc(100vh - 150px)" }}>
-        <div className="absolute inset-0 z-0 animated">
+        <div className="absolute inset-0 z-0 animated pointer-events-none ">
           <Image src="/images/capa1.svg" alt="texture" height={1920} width={1080} />
         </div>
-        <div className="absolute inset-0 z-0 rotate-180 right-0 animated2">
+        <div className="absolute inset-0 z-0 rotate-180 right-0 animated2 pointer-events-none">
           <Image src="/images/capa1.svg" alt="texture" height={1920} width={1080} />
         </div>
         <div className="absolute -right-20 -top-40 flex items-center justify-center">

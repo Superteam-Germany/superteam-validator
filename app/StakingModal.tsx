@@ -53,12 +53,13 @@ function StakingModal() {
         });
 
         console.log(accounts, "accounts");
-        
+        console.log(await connection.getEpochInfo(), "connection.getEpochInfo")
+
         const filteredAccounts = accounts.filter((account) => (account.account.data as ParsedAccountData).parsed.info.stake.delegation.voter === validatorPubKey.toBase58());
         if (filteredAccounts.length) {
           setStakeAccount(filteredAccounts[0])
           const balance = filteredAccounts[0].account.lamports / LAMPORTS_PER_SOL;
-        setBalance(balance)
+          setBalance(balance)
         }
         setLoading(false);
       } catch (error) {
@@ -68,17 +69,17 @@ function StakingModal() {
     }
     if (wallet.publicKey) {
       getStakeAccount();
-    } 
+    }
   }, [wallet.publicKey, reload])
 
-
+  console.log(stakeAccount, "stakeAccount")
 
   const handleStake = async () => {
     try {
       if (!wallet.publicKey) {
         throw new Error('Wallet public key is null');
       }
-  
+
       const connection = new Connection(process.env.NEXT_PUBLIC_HELIUS_URL!)
       const validatorPubKey = new PublicKey(process.env.NEXT_PUBLIC_VALIDATOR_PUBKEY!)
       let transaction = new Transaction();
@@ -99,21 +100,21 @@ function StakingModal() {
           lamports: Number(inputValue) * LAMPORTS_PER_SOL,
           lockup: new Lockup(0, 0, wallet.publicKey), // Optional. We'll set this to 0 for demonstration purposes.
         });
-  
-  
+
+
         // Add the create account instruction to a transaction
         console.log('Adding instructions to transaction')
         newStakeAccountKP = stakeAccount;
         transaction.add(createStakeAccountInstruction);
-  
-  
-  
+
+
+
         // Update the stakeAccount state
       } else {
         stakeAccountKey = stakeAccount.pubkey;
         console.log('Using existing stake account', stakeAccountKey)
       }
-  
+
       console.log('Delegating stake to validator')
       // Delegate stake to the validator
       console.log(stakeAccountKey)
@@ -125,16 +126,16 @@ function StakingModal() {
       console.log('Adding instructions to transaction')
       // Add the delegate instruction to a transaction
       transaction.add(delegateInstruction);
-  
+
       // Get recent blockhash
       const hash = await connection.getLatestBlockhash();
-  
+
       transaction.recentBlockhash = hash.blockhash;
       transaction.feePayer = wallet.publicKey;
       if (newStakeAccountKP) {
         transaction.partialSign(newStakeAccountKP);
       }
-  
+
       // Sign and send the transaction
       if (!wallet || !wallet.signTransaction) {
         throw new Error('Wallet is not connected or signTransaction function is not available');
@@ -143,7 +144,7 @@ function StakingModal() {
       const signedTransaction = await wallet.signTransaction(transaction);
       const transactionId = await connection.sendRawTransaction(signedTransaction.serialize());
       console.log('Transaction ID:', transactionId);
-  
+
       setReload((prev) => prev++);
       toast.success('Staked successfully')
     } catch (error) {
@@ -157,19 +158,19 @@ function StakingModal() {
       if (!wallet.publicKey || !stakeAccount) {
         throw new Error('Wallet public key is null or stake account is not set');
       }
-  
+
       if (!stakeAccount) {
         throw new Error('No Stakeaccount');
       }
-  
+
       const connection = new Connection(process.env.NEXT_PUBLIC_HELIUS_URL!)
-  
+
       // Deactivate the stake
       const deactivateInstruction = StakeProgram.deactivate({
         stakePubkey: stakeAccount.pubkey,
         authorizedPubkey: wallet.publicKey,
       });
-  
+
       // Withdraw the stake
       const withdrawInstruction = StakeProgram.withdraw({
         stakePubkey: stakeAccount.pubkey,
@@ -177,26 +178,26 @@ function StakingModal() {
         toPubkey: wallet.publicKey,
         lamports: balance * LAMPORTS_PER_SOL, // Withdraw the full balance at the time of the transaction
       });
-  
+
       // Add both instructions to a transaction
       const transaction = new Transaction();
       transaction.add(deactivateInstruction);
       transaction.add(withdrawInstruction);
-  
+
       // Get recent blockhash
       const hash = await connection.getLatestBlockhash();
-  
+
       transaction.recentBlockhash = hash.blockhash;
       transaction.feePayer = wallet.publicKey;
-  
+
       // Sign and send the transaction
       if (!wallet || !wallet.signTransaction) {
         throw new Error('Wallet is not connected or signTransaction function is not available');
       }
       const signedTransaction = await wallet.signTransaction(transaction);
-      const transactionId = await connection.sendRawTransaction(signedTransaction.serialize());
+      const transactionId = await connection.sendRawTransaction(signedTransaction.serialize(), { skipPreflight: true });
       console.log('Transaction ID:', transactionId);
-  
+
       setReload((prev) => prev++);
       toast.success('Unstaked successfully')
     } catch (error) {
@@ -207,8 +208,44 @@ function StakingModal() {
 
   return (
     <div className="relative z-50 w-full scale-110 flex items-center justify-center gap-4 max-w-md mt-10 card p-4 mx-auto bg-brand-bg backdrop-blur-xl bg-opacity-50 border border-white border-opacity-40">
+      {/* Calculate Rewards */}
       {
-        wallet.connected ?
+        !wallet.publicKey ? <div className="w-full flex flex-col items-center justify-center gap-2 p-2 bg-brand-bg bg-opacity-[0.05] backdrop-blur-lg rounded-md border border-white border-opacity-10">
+          <div className='w-full flex flex-row items-center justify-center gap-2 '>
+            {
+              wallet.connected ? <p>Calculate Rewards</p> : <input
+                type="text"
+                placeholder='Calculate Rewards'
+                value={inputValue}
+                onChange={(e) => {
+                  const num = Number(e.target.value);
+                  if (num >= 0) {
+                    setInputValue(e.target.value);
+                  }
+                }}
+                className='bg-transparent text-center w-full flex items-center justify-center input input-bordered border-opacity-10 py-1 px-2 h-auto'
+              />
+            }
+          </div>
+          <div className="w-full flex flex-row items-center justify-between gap-2 text-xs p-2">
+            <div className="flex flex-row items-center justify-center gap-2">
+              <p className='font-bold'>Daily:</p>
+              <p>{dailyReward > 0 ? dailyReward.toFixed(2) : "-"} <span className='text-[8px]'>SOL</span></p>
+            </div>
+            <div className="flex flex-row items-center justify-center gap-2">
+              <p className='font-bold'>Weekly:</p>
+              <p>{weeklyReward > 0 ? weeklyReward.toFixed(2) : "-"} <span className='text-[8px]'>SOL</span></p>
+            </div>
+            <div className="flex flex-row items-center justify-center gap-2">
+              <p className='font-bold'>Monthly:</p>
+              <p>{monthlyReward > 0 ? monthlyReward.toFixed(2) : "-"} <span className='text-[8px]'>SOL</span></p>
+            </div>
+          </div>
+        </div> : null
+      }
+      {/* Stake Input */}
+      {
+        wallet.connected && !isLoading ?
           <div className="w-full rounded-md border-opacity-20">
             <div className='flex flex-row items-center justify-center gap-2 '>
               <input
@@ -223,66 +260,43 @@ function StakingModal() {
                 }}
               />
             </div>
-            {
-              balance > 0 ?
-                <div className='w-full flex items-center justify-center flex-col gap-0 mt-2'>
-                  {/* <h2>Stake</h2> */}
-                  <p className='text-[12px] font-bold opacity-50'>Balance: {balance.toFixed(2) || "X"} SOL</p>
-                </div>
-                :
-                isLoading ?
-                  <div className="w-full flex items-center justify-center gap-2 pt-2 text-xs text-white text-opacity-50">
-                    <Spin size='small' /> loading accounts...
-                  </div> :
-                  <p className='text-[8px] opacity-50 w-full text-center'>No Stake Account Yet</p>
-            }
           </div> : null
       }
-
-
+      {/* Stake Buttons */}
       {
-        wallet.connected ? (
+        wallet.connected && !isLoading ? (
           <div className="w-full border border-white border-opacity-10">
             <div className="w-full flex flex-row items-center justify-between gap-2">
-              <button disabled={isLoading} onClick={handleStake} className='!w-[48%] btn gradientBG text-white disabled:cursor-not-allowed'>Stake</button>
-              <button disabled={isLoading} onClick={handleUnstake} className='!w-[48%] btn btn-ghost border border-white border-opacity-10 disabled:cursor-not-allowed'>Unstake</button>
+              <button disabled={isLoading} onClick={handleStake} className='!w-[48%] btn gradientBG text-white disabled:cursor-not-allowed flex flex-row items-center justify-center gap-2'>{isLoading ? <Spin /> : null}Stake</button>
+              <button disabled={isLoading} onClick={handleUnstake} className='!w-[48%] btn btn-ghost border border-white border-opacity-10 disabled:cursor-not-allowed flex flex-row items-center justify-center gap-2'>{isLoading ? <Spin /> : null}Unstake</button>
             </div>
           </div>
         ) : null
       }
-
-      <div className="w-full flex flex-col items-center justify-center gap-2 p-2 bg-brand-bg bg-opacity-[0.05] backdrop-blur-lg rounded-md border border-white border-opacity-10">
-        <div className='w-full flex flex-row items-center justify-center gap-2 '>
-          {
-            wallet.connected ? <p>Calculate Rewards</p> : <input
-              type="text"
-              placeholder='Calculate Rewards'
-              value={inputValue}
-              onChange={(e) => {
-                const num = Number(e.target.value);
-                if (num >= 0) {
-                  setInputValue(e.target.value);
-                }
-              }}
-              className='bg-transparent text-center w-full flex items-center justify-center input input-bordered border-opacity-10 py-1 px-2 h-auto'
-            />
-          }
-        </div>
-        <div className="w-full flex flex-row items-center justify-between gap-2 text-xs p-2">
-          <div className="flex flex-row items-center justify-center gap-2">
-            <p className='font-bold'>Daily:</p>
-            <p>{dailyReward > 0 ? dailyReward.toFixed(2) : NaN} <span className='text-[8px]'>SOL</span></p>
+      {/* Stake Stats */}
+      {
+        wallet.publicKey ? <>
+          <div className="w-full">
+            {
+              balance > 0 ?
+                <div className='w-full grid grid-cols-2 gap-2 mt-2 '>
+                  {/* <h2>Stake</h2> */}
+                  <p className='text-[12px] font-bold opacity-50 bg-black bg-opacity-10 p-0.5 text-center'>Staked: {balance.toFixed(2) || "X"} SOL</p>
+                  <p className='text-[12px] font-bold opacity-50 bg-black bg-opacity-10 p-0.5 text-center'>Activating: {balance.toFixed(2) || "X"} SOL</p>
+                  <p className='text-[12px] font-bold opacity-50 bg-black bg-opacity-10 p-0.5 text-center'>Deactivating: {balance.toFixed(2) || "X"} SOL</p>
+                  <p className='text-[12px] font-bold opacity-50 bg-black bg-opacity-10 p-0.5 text-center'>Activating: {balance.toFixed(2) || "X"} SOL</p>
+                </div>
+                :
+                isLoading ?
+                  <div className="w-full flex items-center justify-center gap-2 py-2 text-xs text-white text-opacity-50">
+                    <Spin size='small' /> loading accounts...
+                  </div> :
+                  <p className='text-[8px] opacity-50 w-full text-center'>No Stake Account Yet</p>
+            }
           </div>
-          <div className="flex flex-row items-center justify-center gap-2">
-            <p className='font-bold'>Weekly:</p>
-            <p>{weeklyReward > 0 ? weeklyReward.toFixed(2) : NaN} <span className='text-[8px]'>SOL</span></p>
-          </div>
-          <div className="flex flex-row items-center justify-center gap-2">
-            <p className='font-bold'>Monthly:</p>
-            <p>{monthlyReward > 0 ? monthlyReward.toFixed(2) : NaN} <span className='text-[8px]'>SOL</span></p>
-          </div>
-        </div>
-      </div>
+        </> : <></>
+      }
+      {/* Connect Wallet */}
       {
         !wallet.connected ? <div className='w-full'>
           <MyMultiButton />
