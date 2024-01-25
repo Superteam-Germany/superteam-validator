@@ -1,14 +1,52 @@
-import React from 'react'
+'use client';
+
+import React, { useEffect, useState } from 'react'
 import GradientLine from '../components/GradientLine'
+import { Connection, LAMPORTS_PER_SOL, ParsedAccountData, PublicKey } from '@solana/web3.js'
 
 function About() {
+  const [stakedSOL, setStakedSOL] = useState(0);
 
   const stats = [
-    { id: 1, name: 'Staked on our validator', value: '8,000+' },
+    { id: 1, name: 'Staked on our validator', value: `${stakedSOL} SOL` },
     { id: 2, name: 'Trusted and experienced team in the ecosystem.', value: 'Est. 2023' },
     { id: 3, name: 'Your staked SOL earns between 7 - 9% APY (Annual Percentage Yield), and compounds the longer it stays staked.', value: 'Earning 7.3%' },
     { id: 4, name: 'Our commission is a low and competitive fee of 5% of your staking rewards.', value: '5% Comission' },
   ]
+
+  useEffect(() => {
+    const fetchStakedSOL = async () => {
+      const connection = new Connection(process.env.NEXT_PUBLIC_HELIUS_URL!, "processed");
+      const STAKE_PROGRAM_ID = new PublicKey("Stake11111111111111111111111111111111111111");
+      const validatorPubKey = new PublicKey(process.env.NEXT_PUBLIC_VALIDATOR_PUBKEY!);
+
+      const accounts = await connection.getParsedProgramAccounts(STAKE_PROGRAM_ID, {
+        filters: [
+          {
+            dataSize: 200, // number of bytes
+          },
+          {
+            memcmp: {
+              offset: 44, // number of bytes
+              bytes: validatorPubKey.toBase58(), // base58 encoded string
+            },
+          },
+        ],
+      });
+
+      const filteredAccounts = accounts.filter((account) => (account.account.data as ParsedAccountData).parsed.info.stake.delegation.voter === validatorPubKey.toBase58());
+      let totalStaked = 0;
+
+      filteredAccounts.forEach(account => {
+        const balance = account.account.lamports / LAMPORTS_PER_SOL;
+        totalStaked += balance;
+      });
+
+      setStakedSOL(totalStaked);
+    };
+
+    fetchStakedSOL();
+  }, []);
 
   return (
     <div className="w-full overflow-hidden">
