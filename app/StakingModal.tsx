@@ -400,13 +400,13 @@ function StakingModal() {
         wallet.connected && !loadingStates.stakeAccount ? (
           <>
             <p className='text-[10px] font-bold opacity-50 bg-black bg-opacity-10 text-center'>Wallet Balance: {balances.yourBalance.toFixed(2) || "X"} SOL</p>
-            <div className="w-full border border-white border-opacity-10">
+            <div className="w-full ">
               <div className="w-full flex flex-row items-center justify-between gap-2">
                 <button disabled={loadingStates.stakeAccount || loadingStates.stakeTx} onClick={handleStake} className='!w-[48%] btn gradientBG text-white disabled:cursor-not-allowed flex flex-row items-center justify-center gap-2'>{loadingStates.stakeTx ? <Spin /> : null}Stake</button>
                 {balances.withdrawable === 0 ?
-                  <button disabled={loadingStates.stakeAccount || loadingStates.unstakeTx || balances.staked + balances.activating <= 0} onClick={handleDeactivateAll} className='!w-[48%] btn btn-ghost border border-white border-opacity-10 disabled:cursor-not-allowed flex flex-row items-center justify-center gap-2'>{loadingStates.unstakeTx ? <Spin /> : null}Deactivate All</button>
+                  <button disabled={loadingStates.stakeAccount || loadingStates.unstakeTx || balances.staked + balances.activating <= 0} onClick={handleDeactivateAll} className='!w-[48%] btn btn-ghost  disabled:cursor-not-allowed flex flex-row items-center justify-center gap-2'>{loadingStates.unstakeTx ? <Spin /> : null}Deactivate All</button>
                   :
-                  <button disabled={loadingStates.stakeAccount || loadingStates.unstakeTx} onClick={handleWithdraw} className='!w-[48%] btn btn-ghost border border-white border-opacity-10 disabled:cursor-not-allowed flex flex-row items-center justify-center gap-2'>{loadingStates.unstakeTx ? <Spin /> : null}Withdraw</button>
+                  <button disabled={loadingStates.stakeAccount || loadingStates.unstakeTx} onClick={handleWithdraw} className='!w-[48%] btn btn-ghost  disabled:cursor-not-allowed flex flex-row items-center justify-center gap-2'>{loadingStates.unstakeTx ? <Spin /> : null}Withdraw</button>
                 }
               </div>
             </div>
