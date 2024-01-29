@@ -8,16 +8,16 @@ import { FaDiscord, FaGithub, FaTwitter, FaFacebook } from "react-icons/fa";
 const navigation = {
   community: [
     { name: 'About', href: 'https://de.superteam.fun/' },
-    { name: 'Blog', href: '#' },
-    { name: 'Jobs', href: '#' },
-    { name: 'Press', href: '#' },
-    { name: 'Partners', href: '#' },
+    // { name: 'Blog', href: '#' },
+    // { name: 'Jobs', href: '#' },
+    // { name: 'Press', href: '#' },
+    // { name: 'Partners', href: '#' },
   ],
-  legal: [
-    { name: 'Claim', href: '#' },
-    { name: 'Privacy', href: '#' },
-    { name: 'Terms', href: '#' },
-  ],
+  // legal: [
+  //   { name: 'Claim', href: '#' },
+  //   { name: 'Privacy', href: '#' },
+  //   { name: 'Terms', href: '#' },
+  // ],
   social: [
     {
       name: 'Facebook',
@@ -81,7 +81,7 @@ export default function Example() {
                 ))}
               </div>
             </div>
-            <div className="mt-16 grid grid-cols-1 gap-8 xl:col-span-2 xl:mt-0">
+            <div className="mt-16 grid grid-cols-1 gap-8 xl:col-span-1 xl:mt-0">
               <div className="md:grid md:grid-cols-2 md:gap-8">
                 <div>
                   <h3 className="text-sm font-semibold leading-6 text-white">Community</h3>
@@ -95,7 +95,7 @@ export default function Example() {
                     ))}
                   </ul>
                 </div>
-                <div className="mt-10 md:mt-0">
+                {/* <div className="mt-10 md:mt-0">
                   <h3 className="text-sm font-semibold leading-6 text-white">Legal</h3>
                   <ul role="list" className="mt-6 space-y-4">
                     {navigation.legal.map((item) => (
@@ -106,7 +106,7 @@ export default function Example() {
                       </li>
                     ))}
                   </ul>
-                </div>
+                </div> */}
               </div>
               {/* <div className="md:grid md:grid-cols-2 md:gap-8">
                 <div>
