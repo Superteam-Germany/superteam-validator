@@ -345,20 +345,7 @@ function StakingModal() {
       {
         <div className="w-full flex flex-col items-center justify-center gap-2 p-2 bg-brand-bg bg-opacity-[0.05] backdrop-blur-lg rounded-md border border-white border-opacity-10">
           <div className='w-full flex flex-row items-center justify-center gap-2 '>
-            {
-              wallet.connected && !loadingStates.stakeAccount ? <p>{stakeAccount.length ? "Your Rewards" : "Calculate Reward"}</p> : <input
-                type="text"
-                placeholder='Calculate Rewards'
-                value={inputValue}
-                onChange={(e) => {
-                  const num = Number(e.target.value);
-                  if (num >= 0) {
-                    setInputValue(e.target.value);
-                  }
-                }}
-                className='bg-transparent text-center w-full flex items-center justify-center input input-bordered border-opacity-10 py-1 px-2 h-auto'
-              />
-            }
+            <p>Calculate Reward</p>
           </div>
           <div className="w-full flex flex-row items-center justify-between gap-2 text-xs p-2">
             <div className="flex flex-row items-center justify-center gap-2">
@@ -393,7 +380,18 @@ function StakingModal() {
                 }}
               />
             </div>
-          </div> : null
+          </div> : <input
+            type="text"
+            placeholder='0 SOL'
+            value={inputValue}
+            onChange={(e) => {
+              const num = Number(e.target.value);
+              if (num >= 0) {
+                setInputValue(e.target.value);
+              }
+            }}
+            className='bg-transparent text-center w-full flex items-center justify-center input input-bordered border-opacity-10 py-1 px-2 h-auto'
+          />
       }
       {/* Stake Buttons */}
       {
