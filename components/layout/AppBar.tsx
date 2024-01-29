@@ -9,7 +9,7 @@ import GradientLine from '../GradientLine'
 import { Logo } from '../Logo'
 
 const navigation = [
-  { name: 'About Superteam', href: '#' },
+  { name: 'About Superteam', href: 'https://de.superteam.fun/' },
 ]
 
 export default function Example() {

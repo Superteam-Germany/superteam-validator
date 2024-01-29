@@ -2,10 +2,12 @@ import { JSX, SVGProps } from 'react'
 import GradientLine from '../GradientLine'
 import Image from 'next/image'
 import { Logo } from '../Logo'
+import { FaDiscord } from "react-icons/fa";
+
 
 const navigation = {
   community: [
-    { name: 'About', href: '#' },
+    { name: 'About', href: 'https://de.superteam.fun/' },
     { name: 'Blog', href: '#' },
     { name: 'Jobs', href: '#' },
     { name: 'Press', href: '#' },
@@ -66,8 +68,8 @@ const navigation = {
       ),
     },
     {
-      name: 'YouTube',
-      href: '#',
+      name: 'Discord',
+      href: 'https://discord.com/invite/CVwJhHgFfF',
       icon: (props: JSX.IntrinsicAttributes & SVGProps<SVGSVGElement>) => (
         <svg fill="currentColor" viewBox="0 0 24 24" {...props}>
           <path
@@ -94,7 +96,7 @@ export default function Example() {
             <div className="space-y-8">
               <Logo isDark={false} />
               <p className="text-sm leading-6 text-gray-300 w-[80%]">
-                Making the world a better place through constructing elegant hierarchies.
+                Building the Solana ecosystem in Germany 🇩🇪
               </p>
               <div className="flex space-x-6">
                 {navigation.social.map((item) => (
