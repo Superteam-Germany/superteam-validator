@@ -2,7 +2,7 @@ import { JSX, SVGProps } from 'react'
 import GradientLine from '../GradientLine'
 import Image from 'next/image'
 import { Logo } from '../Logo'
-import { FaDiscord, FaGithub, FaTwitter, FaFacebook } from "react-icons/fa";
+import { FaDiscord, FaGithub, FaTwitter, FaFacebook, FaTelegram } from "react-icons/fa";
 
 
 const navigation = {
@@ -20,22 +20,15 @@ const navigation = {
   // ],
   social: [
     {
-      name: 'Facebook',
-      href: '#',
+      name: 'Telegram',
+      href: 'https://t.me/solana_germany',
       icon: (props: JSX.IntrinsicAttributes & SVGProps<SVGSVGElement>) => (
-        <FaFacebook />
-      ),
-    },
-    {
-      name: 'Instagram',
-      href: '#',
-      icon: (props: JSX.IntrinsicAttributes & SVGProps<SVGSVGElement>) => (
-        <FaDiscord />
+        <FaTelegram />
       ),
     },
     {
       name: 'Twitter',
-      href: '#',
+      href: 'https://x.com/SuperteamDE',
       icon: (props: JSX.IntrinsicAttributes & SVGProps<SVGSVGElement>) => (
         <FaTwitter />
       ),
@@ -49,7 +42,7 @@ const navigation = {
     },
     {
       name: 'Discord',
-      href: 'https://discord.com/invite/CVwJhHgFfF',
+      href: 'https://discord.gg/CVwJhHgFfF',
       icon: (props: JSX.IntrinsicAttributes & SVGProps<SVGSVGElement>) => (
         <FaDiscord />
       ),
