@@ -81,21 +81,33 @@ function StakingModal() {
             const activationEpoch = stakeAccountData.parsed.info.stake.delegation.activationEpoch;
             const deactivationEpoch = stakeAccountData.parsed.info.stake.delegation.deactivationEpoch;
 
-            if (epoch.epoch <= activationEpoch && activationEpoch !== deactivationEpoch) {
+            console.log(`Account: ${account.pubkey.toBase58()}, Activation Epoch: ${activationEpoch}, Current Epoch: ${epoch.epoch}, Deactivation Epoch: ${deactivationEpoch}`);
+
+            // Adjusting the isActivating condition to include the case where the current epoch equals the activation epoch
+            const isActivating = epoch.epoch <= activationEpoch && (deactivationEpoch === "18446744073709551615" || epoch.epoch < deactivationEpoch);
+            const isDeactivating = epoch.epoch >= deactivationEpoch && deactivationEpoch !== "18446744073709551615";
+            // Adjusting the isActive condition to exclude the case where the current epoch equals the activation epoch
+            const isActive = epoch.epoch > activationEpoch && (deactivationEpoch === "18446744073709551615" || epoch.epoch < deactivationEpoch);
+            const isWithdrawable = !isActivating && !isActive && !isDeactivating;
+
+            if (isActivating) {
+              console.log(`Activating: ${account.pubkey.toBase58()}`);
               totalActivating += balance;
-            } else if (epoch.epoch <= deactivationEpoch && activationEpoch !== deactivationEpoch) {
+            } else if (isDeactivating) {
+              console.log(`Deactivating: ${account.pubkey.toBase58()}`);
               totalDeactivating += balance;
-            } else if (epoch.epoch >= activationEpoch && deactivationEpoch === "18446744073709551615") {
+            } else if (isActive) {
+              console.log(`Active: ${account.pubkey.toBase58()}`)
               totalStaked += balance;
-            } else if ((epoch.epoch > deactivationEpoch || activationEpoch === deactivationEpoch) && deactivationEpoch !== "18446744073709551615") {
+            } else if (isWithdrawable) {
+              console.log(`Withdrawable: ${account.pubkey.toBase58()}`)
               totalWithdrawable += balance;
             }
           });
 
-          const walletBalance = await connection.getBalance(wallet.publicKey!);
-
+          // Update the state with the calculated totals
           setBalances({
-            yourBalance: walletBalance / LAMPORTS_PER_SOL,
+            yourBalance: balances.yourBalance, // Assuming this is fetched elsewhere
             staked: totalStaked,
             activating: totalActivating,
             deactivating: totalDeactivating,
