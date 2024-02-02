@@ -373,9 +373,11 @@ function StakingModal() {
                 placeholder='0 SOL'
                 className='bg-transparent text-xs w-full flex text-center items-center justify-center input input-bordered border-opacity-10'
                 onChange={(e) => {
-                  const num = Number(e.target.value);
-                  if (!isNaN(num) && num > 0) {
+                  const num = parseFloat(e.target.value);
+                  if (num > 0) {
                     setInputValue(e.target.value);
+                  } else {
+                    setInputValue('');
                   }
                 }}
               />
@@ -385,9 +387,11 @@ function StakingModal() {
             placeholder='0 SOL'
             value={inputValue}
             onChange={(e) => {
-              const num = Number(e.target.value);
-              if (num >= 0) {
+              const num = parseFloat(e.target.value);
+              if (num > 0) {
                 setInputValue(e.target.value);
+              } else {
+                setInputValue('');
               }
             }}
             className='bg-transparent text-center w-full flex items-center justify-center input input-bordered border-opacity-10 py-1 px-2 h-auto'

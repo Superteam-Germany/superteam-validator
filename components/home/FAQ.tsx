@@ -17,8 +17,8 @@ const faqs = [
     answer: 'Yes. The Solana software has been audited(where computer engineers check the program code) by Kudelski, a leading cybersecurity firm.Solana Labs also has bug bounties, so anything a developer finds, they can submit and receive a financial reward. You can always withdraw your Stake from the validator, and a validator cant take your SOL. Our validator is hosted professionally with enterprise-level computing servers. Even if the power went down and the server turned off, you can still withdraw your SOL. We never have your SOL, only the voting rights that you can withdraw at any stage.',
   },
   {
-    question: "Why should I stake with Validator.com?",
-    answer: 'Validator.com has massive goals to push the Solana ecosystem forward. Our team is bent on education for everyone, and we welcome anyone to stake with us.You may be new to Solana, and have 1 SOL in your wallet, or a company with 250,000 SOL, we are the choice for you. Our upcoming “alpha” blog keeps you in the know.You have a busy life.You want to know how to stake, why Solana, and ecosystem updates in a concise form. You would earn 6.5 - 8 % a year on your SOL, and commission is a low 5% of your staking rewards.',
+    question: "Why should I stake with SuperteamDE?",
+    answer: 'SuperteamDE has massive goals to push the Solana ecosystem forward. Our team is bent on education for everyone, and we welcome anyone to stake with us.You may be new to Solana, and have 1 SOL in your wallet, or a company with 250,000 SOL, we are the choice for you. Our upcoming “alpha” blog keeps you in the know.You have a busy life.You want to know how to stake, why Solana, and ecosystem updates in a concise form. You would earn 6.5 - 8 % a year on your SOL, and commission is a low 5% of your staking rewards.',
   },
   {
     question: "How long is my SOL locked up for?",
