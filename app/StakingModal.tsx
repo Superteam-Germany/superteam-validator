@@ -360,15 +360,15 @@ function StakingModal() {
             <p>Calculate Reward</p>
           </div>
           <div className="w-full flex flex-row items-center justify-between gap-2 text-xs p-2">
-            <div className="flex flex-col flex-row items-center justify-center gap-2">
+            <div className="flex flex-col md:flex-row items-center justify-center gap-2">
               <p className='font-bold'>Daily:</p>
               <p>{dailyReward > 0 ? dailyReward.toFixed(4) : "-"} <span className='text-[8px]'>SOL</span></p>
             </div>
-            <div className="flex flex-col flex-row items-center justify-center gap-2">
+            <div className="flex flex-col md:flex-row items-center justify-center gap-2">
               <p className='font-bold'>Weekly:</p>
               <p>{weeklyReward > 0 ? weeklyReward.toFixed(4) : "-"} <span className='text-[8px]'>SOL</span></p>
             </div>
-            <div className="flex flex-col flex-row items-center justify-center gap-2">
+            <div className="flex flex-col md:flex-row items-center justify-center gap-2">
               <p className='font-bold'>Monthly:</p>
               <p>{monthlyReward > 0 ? monthlyReward.toFixed(4) : "-"} <span className='text-[8px]'>SOL</span></p>
             </div>
