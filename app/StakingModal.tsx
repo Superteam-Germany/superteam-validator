@@ -40,36 +40,32 @@ function StakingModal() {
 
   useEffect(() => {
     const validatorPubKey = new PublicKey(process.env.NEXT_PUBLIC_VALIDATOR_PUBKEY!);
-    const STAKE_PROGRAM_ID = new PublicKey(
-      "Stake11111111111111111111111111111111111111"
-    );
+    const STAKE_PROGRAM_ID = new PublicKey("Stake11111111111111111111111111111111111111");
 
     async function getStakeAccount() {
       try {
         setLoadingStates(prev => ({ ...prev, stakeAccount: true }));
-
         const connection = new Connection(process.env.NEXT_PUBLIC_HELIUS_URL!, "processed");
 
-        const epoch = await connection.getEpochInfo();
+        // Only proceed if wallet.publicKey is available
+        if (wallet.publicKey) {
+          // Fetch the wallet's balance
+          const walletBalance = await connection.getBalance(wallet.publicKey);
 
-        const accounts = await connection.getParsedProgramAccounts(STAKE_PROGRAM_ID, {
-          filters: [
-            {
-              dataSize: 200, // number of bytes
-            },
-            {
-              memcmp: {
-                offset: 44, // number of bytes
-                bytes: wallet.publicKey!.toBase58(), // base58 encoded string
+          const epoch = await connection.getEpochInfo();
+          const accounts = await connection.getParsedProgramAccounts(STAKE_PROGRAM_ID, {
+            filters: [
+              { dataSize: 200 }, // number of bytes
+              {
+                memcmp: {
+                  offset: 44, // number of bytes
+                  bytes: wallet.publicKey.toBase58(), // base58 encoded string
+                },
               },
-            },
-          ],
-        });
+            ],
+          });
 
-        const filteredAccounts = accounts.filter((account) => (account.account.data as ParsedAccountData).parsed.info.stake.delegation.voter === validatorPubKey.toBase58());
-        if (filteredAccounts.length) {
-          setStakeAccount(filteredAccounts)
-
+          const filteredAccounts = accounts.filter((account) => (account.account.data as ParsedAccountData).parsed.info.stake.delegation.voter === validatorPubKey.toBase58());
           let totalStaked = 0;
           let totalActivating = 0;
           let totalDeactivating = 0;
@@ -81,49 +77,39 @@ function StakingModal() {
             const activationEpoch = stakeAccountData.parsed.info.stake.delegation.activationEpoch;
             const deactivationEpoch = stakeAccountData.parsed.info.stake.delegation.deactivationEpoch;
 
-            console.log(`Account: ${account.pubkey.toBase58()}, Activation Epoch: ${activationEpoch}, Current Epoch: ${epoch.epoch}, Deactivation Epoch: ${deactivationEpoch}`);
-
-            // Adjusting the isActivating condition to include the case where the current epoch equals the activation epoch
             const isActivating = epoch.epoch <= activationEpoch && (deactivationEpoch === "18446744073709551615" || epoch.epoch < deactivationEpoch);
             const isDeactivating = epoch.epoch >= deactivationEpoch && deactivationEpoch !== "18446744073709551615";
-            // Adjusting the isActive condition to exclude the case where the current epoch equals the activation epoch
             const isActive = epoch.epoch > activationEpoch && (deactivationEpoch === "18446744073709551615" || epoch.epoch < deactivationEpoch);
             const isWithdrawable = !isActivating && !isActive && !isDeactivating;
 
-            if (isActivating) {
-              console.log(`Activating: ${account.pubkey.toBase58()}`);
-              totalActivating += balance;
-            } else if (isDeactivating) {
-              console.log(`Deactivating: ${account.pubkey.toBase58()}`);
-              totalDeactivating += balance;
-            } else if (isActive) {
-              console.log(`Active: ${account.pubkey.toBase58()}`)
-              totalStaked += balance;
-            } else if (isWithdrawable) {
-              console.log(`Withdrawable: ${account.pubkey.toBase58()}`)
-              totalWithdrawable += balance;
-            }
+            if (isActivating) totalActivating += balance;
+            else if (isDeactivating) totalDeactivating += balance;
+            else if (isActive) totalStaked += balance;
+            else if (isWithdrawable) totalWithdrawable += balance;
           });
 
-          // Update the state with the calculated totals
+          // Update the state with the fetched wallet balance and calculated totals
           setBalances({
-            yourBalance: balances.yourBalance, // Assuming this is fetched elsewhere
+            yourBalance: walletBalance / LAMPORTS_PER_SOL, // Update yourBalance with the fetched balance
             staked: totalStaked,
             activating: totalActivating,
             deactivating: totalDeactivating,
             withdrawable: totalWithdrawable
           });
+
+          setStakeAccount(filteredAccounts);
         }
         setLoadingStates(prev => ({ ...prev, stakeAccount: false }));
       } catch (error) {
-        console.log(error, "error")
+        console.error("Failed to fetch stake account or balance:", error);
         setLoadingStates(prev => ({ ...prev, stakeAccount: false }));
       }
     }
+
     if (wallet.publicKey) {
       getStakeAccount();
     }
-  }, [wallet.publicKey, reload])
+  }, [wallet.publicKey, reload]);
 
   const handleStake = async () => {
     try {
